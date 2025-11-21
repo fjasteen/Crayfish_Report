@@ -91,22 +91,24 @@ library(glue)
 
 ############ 2. Filter de bruikbare craywatch data er uit ###############
 # Lees craywatch data, localities file en gbif_occ in 
-craywatch_data <- read.csv("~/GitHub/Craywatch-Rapport/R/data/input/craywatch_data.csv")
-map_data <- read.csv("~/GitHub/craywatch/assets/localities.csv")
-gbif_data <- read.csv("~/GitHub/Craywatch-Rapport/R/data/input/gbif/gbif_occ_CF.csv")
+craywatch_data <- read.csv("./data/input/craywatch_data.csv")
+map_data <- read.csv("../craywatch/assets/localities.csv")
+gbif_data <- read.csv("./data/input/gbif/gbif_occ_CF.csv")
 
 # Creeer een unieke sessie ID per locatie (voor locaties die meer dan 1 keer bemonsterd zijn)
+# Rationale is dat alles op dezelfde locatie met meer dan 7 dagen tussen 
+# afzonderlijke metingen betreffen 
 craywatch_data$date <- dmy(craywatch_data$date) # Converteer naar datum
 craywatch_data <- craywatch_data %>%
-  arrange(locID, date) %>%
-  group_by(locID) %>%
-  mutate(
-    date_diff = c(0, diff(date)),
-    session_id = cumsum(date_diff > 7)
-  ) %>%
-  ungroup()
+    arrange(locID, date) %>%
+    group_by(locID) %>%
+    mutate(
+      date_diff = c(0, diff(date)),
+      session_id = cumsum(date_diff > 7)
+    ) %>%
+    ungroup()
 
-# som van vallen en individuen per dag, locatie, soort en sessie
+# dataframe van aantal vallen en individuen per dag, locatie, soort en sessie
 daily_data <- craywatch_data %>%
   group_by(locID, session_id, date, soort) %>%
   summarize(
