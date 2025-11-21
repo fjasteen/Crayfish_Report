@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eml:eml xmlns:eml="https://eml.ecoinformatics.org/eml-2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://eml.ecoinformatics.org/eml-2.2.0 https://rs.gbif.org/schema/eml-gbif-profile/1.3/eml.xsd"
+packageId="b9c58ea3-6572-454c-b529-b8775f868ba7"  system="http://gbif.org" scope="system"
+xml:lang="en">
+    <dataset>
+        <title>GBIF Occurrence Download 0015309-250914085247600</title>
+        <creator>
+            <individualName>
+                <surName>GBIF Download Service</surName>
+            </individualName>
+            <electronicMailAddress>support@gbif.org</electronicMailAddress>
+        </creator>
+        <metadataProvider>
+            <individualName>
+                <surName>GBIF Download Service</surName>
+            </individualName>
+            <electronicMailAddress>support@gbif.org</electronicMailAddress>
+        </metadataProvider>
+        <pubDate>
+                2025-09-18
+        </pubDate>
+        <language>ENGLISH</language>
+        <abstract>
+            A dataset containing all occurrences available in GBIF matching the query:
+{
+  "and" : [
+    "TaxonKey is one of (Procambarus clarkii, Procambarus virginalis, Procambarus acutus, Faxonius limosus, Pacifastacus leniusculus, Faxonius virilis, Faxonius immunis, Faxonius juvenilis, Faxonius rusticus, Pontastacus leptodactylus)",
+    "Country is one of (Belgium)",
+    "HasCoordinate is true",
+    "HasGeospatialIssue is false",
+    "Year is greater than or equal to 2000",
+    "OccurrenceStatus is Present"
+  ]
+}
+The dataset includes records from the following constituent datasets. The full metadata for each constituent is also included in this archive:
+197 records from Invasive species - American bullfrog (Lithobates catesbeianus) in Flanders, Belgium
+74 records from VIS - Non-native fish in Flanders, Belgium
+910 records from DEMNA-DNE : Exotic animal occurrences in Wallonia, Belgium
+1 records from NABU|naturgucker
+48 records from Monitoring of fishes and crustaceans by Province East Flanders in Flanders, Belgium
+5 records from Diveboard - Scuba diving citizen science observations
+164 records from Programme CROMIS: carnet de plongée en ligne de la FFESSM-Observations d'espèces subaquatiques collectées par les utilisateurs de CROMIS
+2 records from Contrat de Rivière - RIPARIAS: detection and management of aquatic invasive alien species
+190 records from VIS - Fishes in inland waters in Flanders, Belgium
+13 records from Collections and observation data National Museum of Natural History Luxembourg
+228 records from Contrats de Rivière IAS surveillance: monitoring of aquatic and riparian invasive alien species in Wallonia, 2023-2024
+25 records from data.mnhn.lu observation data
+11 records from VIS - Fishes in estuarine waters in Flanders, Belgium
+57 records from VIS - Specific reference freshwater monitoring in Flanders, Belgium (post 2013)
+11 records from International Barcode of Life project (iBOL)
+3552 records from Waarnemingen.be - Non-native animal occurrences in Flanders and the Brussels Capital Region, Belgium
+206 records from Alien macroinvertebrates in Flanders, Belgium
+1374 records from Observations.be - Non-native species occurrences in Wallonia, Belgium
+9 records from RATO - daily operations commissioned by the province East Flanders, Belgium
+10 records from INSDC Sequences
+2 records from Water Framework Directive AGE, Recorder-Lux database
+3 records from RBINS Crustacea collection
+1 records from Observation.org, Nature data from around the World
+46 records from Programme BioObs: observations naturalistes en milieux aquatiques-Observations de BioObs.
+211 records from DEMNA-DNE : Occurrences of benthic macroinvertebrates in running waters of Wallonia, Belgium
+2 records from Dutch Foundation for Applied Water Research (STOWA) - Limnodata Neerlandica
+35 records from Monitoring of invasive alien crayfishes in the Flemish part of the LIFE RIPARIAS areas
+173 records from VIS - Reference freshwater monitoring in Flanders, Belgium (post 2013)
+270 records from DEMNA-DNE : Early warning system on Introduced Species in Wallonia
+54 records from iNaturalist Research-grade Observations
+10 records from VIS - Estuarine monitoring in Flanders, Belgium (post 2013)
+
+        </abstract>
+        <contact>
+            <individualName>
+                <surName>GBIF Download Service</surName>
+            </individualName>
+            <electronicMailAddress>support@gbif.org</electronicMailAddress>
+        </contact>
+
+    </dataset>
+
+    <additionalMetadata>
+        <metadata>
+            <gbif>
+                <dateStamp>2025-09-18T14:24:21Z</dateStamp>
+                <citation identifier="0015309-250914085247600">GBIF Occurrence Download 0015309-250914085247600</citation>
+                <physical>
+                    <objectName>Darwin Core Archive</objectName>
+                    <characterEncoding>UTF-8</characterEncoding>
+                    <dataFormat>
+                        <externallyDefinedFormat>
+                            <formatName>Darwin Core Archive</formatName>
+                        </externallyDefinedFormat>
+                    </dataFormat>
+                    <distribution>
+                        <online>
+                            <url function="download">https://api.gbif.org/v1/occurrence/download/request/0015309-250914085247600.zip</url>
+                        </online>
+                    </distribution>
+                </physical>
+            </gbif>
+        </metadata>
+    </additionalMetadata>
+    </eml:eml>

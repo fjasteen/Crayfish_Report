@@ -1,0 +1,249 @@
+<?xml version="1.0" encoding="utf-8"?>
+<eml:eml xmlns:eml="https://eml.ecoinformatics.org/eml-2.2.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="https://eml.ecoinformatics.org/eml-2.2.0 https://rs.gbif.org/schema/eml-gbif-profile/1.3/eml.xsd"
+packageId="b2906713-07c4-41b1-887f-adfc0a24b3ab"  system="http://gbif.org" scope="system"
+xml:lang="en">
+    <dataset>
+        <alternateIdentifier>10.15468/klsy8u</alternateIdentifier>
+        <alternateIdentifier>https://ipt.inbo.be/resource?r=vis-freshwater-monitoring-events</alternateIdentifier>
+        <alternateIdentifier>b2906713-07c4-41b1-887f-adfc0a24b3ab</alternateIdentifier>
+        <alternateIdentifier>http://data.inbo.be/ipt/resource?r=vis-freshwater-monitoring-events</alternateIdentifier>
+        <title>VIS - Reference freshwater monitoring in Flanders, Belgium (post 2013)</title>
+        <creator>
+            <individualName>
+                <givenName>Gerlinde</givenName>
+                <surName>Van Thuyne</surName>
+            </individualName>
+            <organizationName>INBO</organizationName>
+            <positionName>Researcher</positionName>
+            <address>
+                <deliveryPoint>Duboislaan 14</deliveryPoint>
+                <city>Groenendaal</city>
+                <country>BELGIUM</country>
+            </address>
+            <electronicMailAddress>gerlinde.vanthuyne@inbo.be</electronicMailAddress>
+        </creator>
+        <creator>
+            <individualName>
+                <givenName>Jan</givenName>
+                <surName>Breine</surName>
+            </individualName>
+            <organizationName>INBO</organizationName>
+            <address>
+                <city>Linkebeek</city>
+                <administrativeArea>Brussels Capital Region</administrativeArea>
+                <postalCode>1070</postalCode>
+                <country>BELGIUM</country>
+            </address>
+            <electronicMailAddress>jan.breine@inbo.be</electronicMailAddress>
+        </creator>
+        <metadataProvider>
+            <individualName>
+                <givenName>Dimitri</givenName>
+                <surName>Brosens</surName>
+            </individualName>
+            <organizationName>INBO</organizationName>
+            <positionName>Biodiversity Liaison Manager</positionName>
+            <address>
+                <deliveryPoint>Kliniekstraat</deliveryPoint>
+                <city>Brussels</city>
+                <administrativeArea>Brussels Capital Region</administrativeArea>
+                <postalCode>1070</postalCode>
+                <country>BELGIUM</country>
+            </address>
+            <phone>0497354796</phone>
+            <electronicMailAddress>dimitri.brosens@inbo.be</electronicMailAddress>
+        </metadataProvider>
+        <associatedParty>
+            <individualName>
+                <givenName>Dimitri</givenName>
+                <surName>Brosens</surName>
+            </individualName>
+            <electronicMailAddress>dimitri.brosens@inbo.be</electronicMailAddress>
+            <role>USER</role>
+        </associatedParty>
+        <pubDate>
+                2025-05-14
+        </pubDate>
+        <language>ENGLISH</language>
+        <abstract>
+            <para>VIS - &amp;#39;Reference Freshwater Monitoring’ in Flanders, Belgium is a sample based dataset published by the Research Institute for Nature and Forest (INBO). The database is described in Brosens et al. 2015 (https://doi.org/10.3897/zookeys.475.8556). The dataset contains over 25,000 fish occurrences sampled between 2013 and 2015 from 246 in inland rivers, streams and canals in Flanders, Belgium. The dataset includes 42 fish species, as well as a number of non-target species (mainly crustaceans). The data are retrieved from the Fish Information System (VIS), a database set up to monitor the status of fishes and their habitats in Flanders and are collected in support of the Water Framework Directive, the Habitat Directive, certain red lists, and biodiversity research. Additional information, such as measurements, absence information and abiotic data are available upon request. Issues with the dataset can be reported at https://github.com/inbo/data-publication/tree/master/datasets/vis-freshwater-monitoring-events</para><para>Length and weight measurement data of the individual fishes, absence information, occurrence data since 2013, as well as abiotic data of the sampling points (pH, temperature, etc.) are not included in the Darwin Core Archive and are available upon request.</para><para>To allow anyone to use this dataset, we have released the data to the public domain under a Creative Commons Zero waiver (http://creativecommons.org/publicdomain/zero/1.0/). We would appreciate however, if you read and follow these norms for data use (http://www.inbo.be/en/norms-for-data-use) and provide a link to the original dataset (https://doi.org/10.15468/klsy8u) whenever possible. If you use these data for a scientific paper, please cite the dataset following the applicable citation norms and/or consider us for co-authorship. We are always interested to know how you have used or visualized the data, or to provide more information, so please contact us via the contact information provided in the metadata, opendata&amp;#64;inbo.be or https://twitter.com/LifeWatchINBO.</para>
+        </abstract>
+        <keywordSet>
+            <keyword>Samplingevent</keyword>
+            <keywordThesaurus>GBIF Dataset Type Vocabulary: http://rs.gbif.org/vocabulary/gbif/dataset_type.xml</keywordThesaurus>
+        </keywordSet>
+        <keywordSet>
+            <keyword>ecosystem functioning</keyword>
+            <keyword>fish-based index of biotic integrity</keyword>
+            <keyword>River Yser</keyword>
+            <keyword>fish distribution</keyword>
+            <keyword>LifeWatch</keyword>
+            <keyword>freshwater</keyword>
+            <keyword>River Meuse</keyword>
+            <keyword>open data</keyword>
+            <keyword>River Scheldt</keyword>
+            <keywordThesaurus>n/a</keywordThesaurus>
+        </keywordSet>
+        <keywordSet>
+            <keyword>Samplingevent</keyword>
+            <keywordThesaurus>GBIF Dataset Type Vocabulary: http://rs.gbif.org/vocabulary/gbif/dataset_type_2015-07-10.xml</keywordThesaurus>
+        </keywordSet>
+        <intellectualRights>
+            <para>To the extent possible under law, the publisher has waived all rights to these data and has dedicated them to the <ulink url="http://creativecommons.org/publicdomain/zero/1.0/legalcode"><citetitle>Public Domain (CC0 1.0)</citetitle></ulink>. Users may copy, modify, distribute and use the work, including for commercial purposes, without restriction.</para>
+        </intellectualRights>
+        <licensed>
+            <licenseName>Creative Commons Zero v1.0 Universal</licenseName>
+            <url>https://spdx.org/licenses/CC0-1.0.html</url>
+            <identifier>CC0-1.0</identifier>
+        </licensed>
+        <distribution scope="document">
+            <online>
+                <url function="information">http://vis.milieuinfo.be</url>
+            </online>
+        </distribution>
+        <distribution scope="document">
+            <online>
+                <url function="download">https://ipt.inbo.be/archive.do?r=vis-freshwater-monitoring-events</url>
+            </online>
+        </distribution>
+        <coverage>
+            <geographicCoverage>
+                <geographicDescription>Flanders is one of the three administrative regions in the country of Belgium, located in the centre of Western Europe. The Flemish region is situated in the north of the country and covers an area of 13,522 km² (44,29% of Belgium). Belgium has a temperate maritime climate that is influenced by the North Sea and the Atlantic Ocean with substantial precipitation in all seasons. The summers are moderate and the winters are mild. The two main geographical regions of Flanders are the coastal plain in the North-West and the Central plain, further inland. With 470 inhabitants/km², Flanders is one of the most densely populated areas of Europe. The three major rivers are the River Yser, the River Scheldt, and the River Meuse. All rivers in Flanders flow into the North Sea, but only the River Yser drains directly into the sea within the jurisdiction of Flanders.
+
+The dataset comprises enclosed waters, including cut off river arms, gravel pits, ponds, natural lakes, and artificial lakes; and riverine habitats, including head streams, tributaries, and canals part of the drainage basins of the rivers Yser, Scheldt and Meuse. These three drainage basins are divided into eleven Flemish river catchments, which are divided into 102 subbasins. Overall, there are 48 unique enclosed waters sampled at 792 locations and 419 streams and rivers sampled at 1,452 locations.</geographicDescription>
+                <boundingCoordinates>
+                    <westBoundingCoordinate>2.54</westBoundingCoordinate>
+                    <eastBoundingCoordinate>5.92</eastBoundingCoordinate>
+                    <northBoundingCoordinate>51.51</northBoundingCoordinate>
+                    <southBoundingCoordinate>50.68</southBoundingCoordinate>
+                </boundingCoordinates>
+            </geographicCoverage>
+            <temporalCoverage>
+                <rangeOfDates>
+                    <beginDate>
+                        <calendarDate>                2013-01-01
+</calendarDate>
+                    </beginDate>
+                    <endDate>
+                        <calendarDate>                2024-01-01
+</calendarDate>
+                    </endDate>
+                </rangeOfDates>
+            </temporalCoverage>
+            <taxonomicCoverage>
+                <generalTaxonomicCoverage>The dataset contains 64 fish species reported from Flemish watercourses, as well as a number of non-target species (mainly crustaceans). This dataset also includes a number of typical brackish water fish species which sometimes can be found in inland water sites in proximity to the sea and/or behind the sluice gates. The class of Actinopterygii is best represented (63 species), along with one Petromyzontida (Lampetra planeri) and 7 crustaceans from the order Decapoda.</generalTaxonomicCoverage>
+                <taxonomicClassification>
+                    <taxonRankName>Kingdom</taxonRankName>
+                    <taxonRankValue>Animalia</taxonRankValue>
+                </taxonomicClassification>
+                <taxonomicClassification>
+                    <taxonRankName>Class</taxonRankName>
+                    <taxonRankValue>Actinopterygii</taxonRankValue>
+                </taxonomicClassification>
+                <taxonomicClassification>
+                    <taxonRankName>Class</taxonRankName>
+                    <taxonRankValue>Petromyzontida</taxonRankValue>
+                </taxonomicClassification>
+            </taxonomicCoverage>
+        </coverage>
+        <purpose><para>The Fish Information System or VIS (http://vis.milieuinfo.be) is a database created by the Research Institute for Nature and Forest (INBO) which is used to monitor the status of fishes and their habitats in Flanders, Belgium and to calculate the biotic integrity (Karr 1981, Belpaire et al. 2000, Breine et al. 2004, 2007, 2010) of fish assemblages. It contains data regarding occurrences, individual morphometrics, stocks, pollutants, indices, and non-native fish species. Sampling has been going on since 1992, the database model was designed in 1994 (Verbiest et al. 1994), the first database developed in 1996 (Verbiest et al. 1996), and the consolidated database set up in 2001. VIS is used for supporting NATURA 2000, an ecological network of protected areas in Europe and to calculate the EQR (Ecological Quality Ratio) in the framework of the EU Water Directive (Directive 2000/60/EC). Further, the database provides updated information for Flemish Red Lists of fishes and lampreys (Verreycken et al. 2014) and on the distribution status of non-native and invasive fish species. The data are also crucial in fish stock management and for reporting on the status of the European eel stock as required by the Eel Regulation (Council Regulation (EC) N° 1100/2007). This dataset is a standardized extraction of all inland water species occurrences from VIS.</para></purpose>
+        <maintenance>
+            <description>
+                <para></para>
+            </description>
+            <maintenanceUpdateFrequency>asNeeded</maintenanceUpdateFrequency>
+        </maintenance>
+        <contact>
+            <individualName>
+                <givenName>Gerlinde</givenName>
+                <surName>Van Thuyne</surName>
+            </individualName>
+            <organizationName>INBO</organizationName>
+            <positionName>Researcher</positionName>
+            <address>
+                <deliveryPoint>Duboislaan 14</deliveryPoint>
+                <city>Linkebeek</city>
+                <country>BELGIUM</country>
+            </address>
+        </contact>
+        <methods>
+            <methodStep>
+                <description>
+                    <para>Water type: Running freshwaters (width: 1.5 m, depth: &lt; 1.30 m)
+Method: electrofishing with 1 anode by wading
+Effort: 100 m</para>
+                </description>
+            </methodStep>
+            <methodStep>
+                <description>
+                    <para>Water type: Running freshwaters (width: 6 m, depth: &lt; 1.30 m)
+Method: electrofishing with 2 anodes by wading
+Effort: 100 m</para>
+                </description>
+            </methodStep>
+            <methodStep>
+                <description>
+                    <para>Water type: Running freshwaters (width: &gt; 6 m, depth: &lt; 1.30 m)
+Method: electrofishing with 2 anodes by wading
+Effort: 250 m with 1 anode on each riverbank, 2 m from bank</para>
+                </description>
+            </methodStep>
+            <methodStep>
+                <description>
+                    <para>Water type: Running freshwaters, streaming rivers (width: &gt; 6m, depth: &gt; 1.30 m)
+Method: electrofishing with 2 anodes by boat
+Effort: 250 m with 2 anodes on each riverbank, 2 m from bank</para>
+                </description>
+            </methodStep>
+            <methodStep>
+                <description>
+                    <para>Water type: Canals, slowly running rivers (width: &gt; 6 m, depth: &gt; 1.30 m)
+Method: electrofishing with 2 anodes by boat AND 2 fykes
+Effort: 250 m with 2 anodes on each riverbank, 2 m from bank AND 1 fyke for 48 hours parallel with and on both riverbanks</para>
+                </description>
+            </methodStep>
+            <methodStep>
+                <description>
+                    <para>Water type: Canalized rivers with too high conductivity for electrofishing (depth: &lt; 1.30 m)
+Method: seine netting
+Effort: 100 m, two times complete seine netting</para>
+                </description>
+            </methodStep>
+            <sampling>
+                <studyExtent>
+                    <description>
+                        <para>Over 2,000 locations in estuaries, inland rivers, streams, canals, and enclosed waters in Flanders, Belgium have been sampled, from March to November, since 1992. In 2001, these locations were consolidated in a monitoring network (“VISmeetnet -”) of 900 sampling points. The geographic coordinates in the dataset are those of the defined sampling locations (dwc:locationID). However, as these coordinates are not always exact the actual coordinates of the catch, which may be located further up- or downriver, the coordinate uncertainty (dwc:coordinateUncertaintyInMeters) has been set to 250 meter. Information on the data collected before 2013 can be found in Brosens et al, 2015. From 2013 data was collected, only by using a subset of the Fish Reference Network, the Flemish Reference Freshwater Monitoring. This subset holds about 300 measuring points. The methodology before and after 2013 is equal, except that in the post 2013 survey period multiple fishing events were performed on the same location (Depletion fishing).</para>
+                    </description>
+                </studyExtent>
+                <samplingDescription>
+                    <para>Standardized sampling methods were used as described in Belpaire et al. (2000) and Van Thuyne &amp; Breine (2010) and are specified in the dataset as dwc:samplingProtocol. Per water body, the same method was used for each sampling event. The default method is electric fishing, but additional techniques such as gill nets, fykes, and seine netting (variable sizes) were used as well. Electric fishing was carried out using a 5 kW generator with an adjustable output voltage of 300–500 V and a pulse frequency of 480 Hz. The number of electric fishing devices and hand-held anodes used depends on the river width (Belpaire et al. 2000). In riverine environments, electric fishing was carried out on both riverbanks in upstream direction. All fishes were identified to species level, counted, and their length and weight was measured (measurement data available upon request). Since 2013, electric fishing was carried out until depletion.</para>
+                </samplingDescription>
+            </sampling>
+            <qualityControl>
+                <description>
+                    <para>Strict field protocols where used. The Manual for Application of the European Fish Index (EFI) (Fame consortium 2004) served as a guideline for electrofishing and was used in support of the EU water framework directive.</para>
+                </description>
+            </qualityControl>
+        </methods>
+
+    </dataset>
+
+    <additionalMetadata>
+        <metadata>
+            <gbif>
+                <dateStamp>2025-09-18T14:24:20Z</dateStamp>
+                <citation identifier="https://doi.org/10.15468/klsy8u">Van Thuyne G, Breine J, Brosens D (2025). VIS - Reference freshwater monitoring in Flanders, Belgium (post 2013). Version 1.14. Research Institute for Nature and Forest (INBO). Sampling event dataset https://doi.org/10.15468/klsy8u accessed via GBIF.org on 2025-09-18.</citation>
+                <bibliography>
+                <citation>Breine, J.J.; Goethals, P.; Simoens, I.;Ercken, D.; Van Liefferinghe, C.; Verhaegen, G.; Belpaire, C.; De Pauw, N.; Meire, P.; Ollevier, F. (2001). De visindex als instrument voor het meten van de biotische integriteit van de Vlaamse binnenwateren. Instituut voor Bosbouw en Wildbeheer, Groenendaal. Eindverslag van project VLINA 9901, studie uitgevoerd voor rekening van de Vlaamse Gemeenschap binnen het kader van het Vlaams Impulsprogramma Natuurontwikkeling. 173 pp. + bijlagen.</citation>
+                <citation>EU Water Framework Directive (2000). Directive of the European parliament and of the council 2000/60/EC establishing a framework for community action in the field of water policy. Official Journal of the European Communities 22.12.2000 L 327/1.</citation>
+                <citation>Geeraerts, C.; Quataert, P. (2012a). Meetnetstrategie voor de visfauna van de Habitatrichtlijn. Revisie van het INBO-zoetwatervismeetnet. Rapporten van het Instituut voor Natuur- en Bosonderzoek 2012 (INBO.R.2012.56). Instituut voor Natuur- en Bosonderzoek, Brussel.</citation>
+                <citation>Geeraerts, C. ; Quataert, P. (2012b). Ontwerp van het Vlaams referentiemeetnet voor de visfauna. Revisie van het INBO-zoetwatervismeetnet op basis van een vraaganalyse van de informatiebehoefte van de Kaderrichtlijn Water met aandacht voor een betere afstemming tussen de ecologische meetnetten en andere monitoringsverplichtingen.Rapporten van het Instituut voor Natuur- en Bosonderzoek 2012 (rapportnr. 41). Instituut voor Natuur- en Bosonderzoek, Brussel.</citation>
+                <citation>Van Thuyne, G.; Galle, L.; Maes, Y.; De Bruyn, A.; Lambeens, I. en Breine J. (2016). Visbestandopnames in het kader van het Referentiemeetnet 2014-Bemonsteringsverslag. Rapporten van het Instituut voor Natuur- en Bosonderzoek 2016 (rapportnr. 11823901). Instituut voor Natuur- en Bosonderzoek, Brussel.</citation>
+                <citation>Van Thuyne, G.; Galle, L.; Maes, Y.; De Bruyn, A.; Lambeens, I. en Breine J. (2015). Visbestandopnames in het kader van het Referentiemeetnet 2013-Bemonsteringsverslag. Rapporten van het Instituut voor Natuur- en Bosonderzoek 2015 (rapportnr. 11299278). Instituut voor Natuur- en Bosonderzoek, Brussel.</citation>
+                </bibliography>
+                <resourceLogoUrl>https://ipt.inbo.be/logo.do?r=vis-freshwater-monitoring-events</resourceLogoUrl>
+            </gbif>
+        </metadata>
+    </additionalMetadata>
+    </eml:eml>
