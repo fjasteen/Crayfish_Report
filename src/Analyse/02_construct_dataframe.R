@@ -16,6 +16,7 @@ library(tidyr)
 library(lubridate)
 library(rgbif)
 library(readr)
+library(stringr)
 library(glue)
 
 ############### 1. Haal gbif data ###################
@@ -91,7 +92,7 @@ library(glue)
 
 ############ 2. Construct Crayfish analysis data file ###############
 # read craywatch validated data, localities.csv gbif_occ 
-craywatch_data <- read.csv("./data/input/craywatch_data.csv")
+craywatch_data <- read.csv("./data/input/craywatch_data.csv") #10.5281/zenodo.17639074
 map_data <- read.csv("../craywatch/assets/localities.csv")
 gbif_data <- read.csv("./data/input/gbif/gbif_occ_CF.csv")
 
@@ -100,12 +101,13 @@ gbif_data <- read.csv("./data/input/gbif/gbif_occ_CF.csv")
 craywatch_data$date <- dmy(craywatch_data$date) # Converteer naar datum
 craywatch_data <- craywatch_data %>%
     arrange(locID, date) %>%
+    filter(str_detect(locID, "^[A-Z]_[0-9]{4}_[0-9]+$")) %>% #remove faulty locID
     group_by(locID) %>%
     mutate(
       date_diff = c(0, diff(date)),
       session_nr = cumsum(date_diff > 7)
     ) %>%
-    ungroup() # REMOVE NA IN LOCID!!!!!
+    ungroup() 
 
 # df with locID, session_nr, date, soort, individuals- & traps_daily, vrijwillID
 daily_data <- craywatch_data %>%
@@ -118,6 +120,8 @@ daily_data <- craywatch_data %>%
   )
          
 # Group daily data
+# remove all unvalid absences (<12 trapdays in water)
+# keep all rows where one specimen is caught
 grouped_craywatch_data <- daily_data %>%
   group_by(locID, session_nr, soort) %>%  # Groepeer per locatie, sessie en soort
   summarize(
@@ -134,22 +138,18 @@ grouped_craywatch_data <- daily_data %>%
     vrijwillID = first(vrijwillID),
   ) %>%
   dplyr::filter((soort == "crayfish indet" & traps_used >= 12) | (soort != "crayfish indet")) %>% # Filter rijen die aan het protocol voldoen
-  select(-session_nr) # Verberg de session_nr kolom
+  select(-session_nr) # remove session_nr
 
-# Selecteer de kolommen 'locID', 'Latitude', and 'Longitude' van localities
-localities_selected <- map_data %>%
-  dplyr::select(locID, Latitude, Longitude)
-
-# voeg data samen met localities om Latitude en Longitude toe te voegen obv locID
-grouped_craywatch_data <- left_join(grouped_craywatch_data, localities_selected, by = "locID")
-
-# Ontbrekende locIDs en coördinaten er uit halen
+# Add columns latlongs from map_data to grouped_craywatch_data
 grouped_craywatch_data <- grouped_craywatch_data %>%
+  left_join(
+    map_data %>% select(locID, Latitude, Longitude),
+    by = "locID"
+  ) %>%
   mutate(
-    longitude = as.numeric(Longitude),
-    latitude = as.numeric(Latitude)) %>%
-  dplyr::filter(!is.na(longitude) & !is.na(latitude)) %>%
-  select(-Latitude, -Longitude)
+    latitude  = as.numeric(Latitude),
+    longitude = as.numeric(Longitude)
+  )
 
 # # Maak GIS-laag
 # craywatch_sf <- st_as_sf(grouped_craywatch_data, coords = c("longitude", "latitude"), crs = 4326)
