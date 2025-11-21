@@ -89,28 +89,27 @@ library(glue)
 # writeLines(download_doi, con = "~/GitHub/Craywatch-Rapport/R/data/input/gbif/gbif_download_doi.txt")
 
 
-############ 2. Filter de bruikbare craywatch data er uit ###############
-# Lees craywatch data, localities file en gbif_occ in 
+############ 2. Construct Crayfish analysis data file ###############
+# read craywatch validated data, localities.csv gbif_occ 
 craywatch_data <- read.csv("./data/input/craywatch_data.csv")
 map_data <- read.csv("../craywatch/assets/localities.csv")
 gbif_data <- read.csv("./data/input/gbif/gbif_occ_CF.csv")
 
-# Creeer een unieke sessie ID per locatie (voor locaties die meer dan 1 keer bemonsterd zijn)
-# Rationale is dat alles op dezelfde locatie met meer dan 7 dagen tussen 
-# afzonderlijke metingen betreffen 
+# Create session nr (nr) per locID (> 1 x sampled)
+# all sampled with interval >7 days is a seperate sampling session
 craywatch_data$date <- dmy(craywatch_data$date) # Converteer naar datum
 craywatch_data <- craywatch_data %>%
     arrange(locID, date) %>%
     group_by(locID) %>%
     mutate(
       date_diff = c(0, diff(date)),
-      session_id = cumsum(date_diff > 7)
+      session_nr = cumsum(date_diff > 7)
     ) %>%
-    ungroup()
+    ungroup() # REMOVE NA IN LOCID!!!!!
 
-# dataframe van aantal vallen en individuen per dag, locatie, soort en sessie
+# df with locID, session_nr, date, soort, individuals- & traps_daily, vrijwillID
 daily_data <- craywatch_data %>%
-  group_by(locID, session_id, date, soort) %>%
+  group_by(locID, session_nr, date, soort) %>%
   summarize(
     individuals_daily = sum(number.of.individuals, na.rm = TRUE),
     traps_daily = sum(number.of.traps, na.rm = TRUE),
@@ -118,9 +117,9 @@ daily_data <- craywatch_data %>%
     .groups = 'drop'
   )
          
-# groepeer de data en filter de bruikbare data er uit
+# Group daily data
 grouped_craywatch_data <- daily_data %>%
-  group_by(locID, session_id, soort) %>%  # Groepeer per locatie, sessie en soort
+  group_by(locID, session_nr, soort) %>%  # Groepeer per locatie, sessie en soort
   summarize(
     individuals_caught = sum(individuals_daily, na.rm = TRUE),
     days_sampled = n_distinct(date),
@@ -135,7 +134,7 @@ grouped_craywatch_data <- daily_data %>%
     vrijwillID = first(vrijwillID),
   ) %>%
   dplyr::filter((soort == "crayfish indet" & traps_used >= 12) | (soort != "crayfish indet")) %>% # Filter rijen die aan het protocol voldoen
-  select(-session_id) # Verberg de session_id kolom
+  select(-session_nr) # Verberg de session_nr kolom
 
 # Selecteer de kolommen 'locID', 'Latitude', and 'Longitude' van localities
 localities_selected <- map_data %>%
