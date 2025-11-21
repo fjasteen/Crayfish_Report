@@ -2,4 +2,25 @@
 .Rhistory
 .RData
 .Ruserdata
-data/input/shapefiles/
+
+# RStudio specific
+*.Rproj
+
+# Data (raw and processed)
+data/input/
+data/raw/
+data/processed/
+data/output/
+
+# GIS files
+*.shp
+*.shx
+*.dbf
+*.prj
+*.gdb/
+*.gpkg
+
+# Temporary and cache
+*.tmp
+*.log
+cache/
