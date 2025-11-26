@@ -1,115 +1,43 @@
 # ====================================================
-# Scriptnaam: 04_analyze_validated_data.R
-# Auteur: Margot Vermeylen
-# Datum: 09-01-2025 (update 18-09-2025)
-# Beschrijving: 
-# Dit script maakt een dataset voor analyse waarin de gefilterde craywatch data en gbif data sinds 2000 gecombineerd worden.
+# Scriptnaam: 02_construct_data_frame.R
+# Auteur: 
+# Datum: 01-09-2025 (update 26-11-2025)
+# Beschrijving:
+# Haalt de bruikbare data uit de gevalideerde dataset (validatiecriteria)
+# Combineert data met GBIF data tot analysedataset
 # ====================================================
 
-# Laad libraries
-library(ggspatial)
-library(sf)
-library(dplyr)
-library(scales)
-library(osmdata)
-library(tidyr)
-library(lubridate)
-library(rgbif)
-library(readr)
-library(stringr)
-library(glue)
+# --- 0. Instellingen laden ---
+source("./src/config.R")
 
-############### 1. Haal gbif data ###################
-# species <- c("Procambarus clarkii",
-#              "Procambarus virginalis",
-#              "Procambarus acutus",
-#              "Faxonius limosus",
-#              "Pacifastacus leniusculus",
-#              "Faxonius virilis",
-#              "Faxonius immunis",
-#              "Faxonius juvenilis",
-#              "Faxonius rusticus",
-#              "Pontastacus leptodactylus")
-# 
-# 
-# taxonkeys <-species %>% name_backbone_checklist()  %>% # match to backbone
-#   filter(!matchType == "NONE") %>% # get matched names
-#   pull(usageKey) # get the gbif taxonkeys
-# 
-# gbif_user <- Sys.getenv("gbif_user")
-# gbif_pwd <- Sys.getenv("gbif_pwd")
-# gbif_email <- Sys.getenv("gbif_email")
-# 
-# set <-occ_download(
-#   pred_in("taxonKey", taxonkeys),
-#   pred_in("country", c("BE")),
-#   pred("hasCoordinate", TRUE),
-#   pred("hasGeospatialIssue", FALSE),
-#   pred_gte("year", 2010),
-#   pred("occurrenceStatus", "PRESENT"),
-#   user=gbif_user,pwd=gbif_pwd,email=gbif_email,
-#   curlopts=list(http_version=2)
-# )
-# 
-# repeat{
-#   Sys.sleep(time = 5*length(taxonkeys))
-#   test_set <- occ_download_meta(set)
-#   if(test_set$status == "SUCCEEDED"){
-#     download_doi <- test_set$doi
-#     print(paste("De DOI van je download is:", download_doi))
-#     rawdata_set_imported <- occ_download_get(set,
-#                                              path = "~/GitHub/Craywatch-Rapport/R/data/intermediate/",
-#                                              overwrite = TRUE,
-#                                              curlopts=list(http_version=2),
-#                                              return = NULL,
-#                                              verbatim = NULL) %>%
-#       occ_download_import()
-#     break
-#   }
-#   print(test_set$status)
-# }
-# 
-# unzip(paste0("~/GitHub/Craywatch-Rapport/R/data/intermediate/",test_set$key,".zip"),
-#       exdir= paste0("~/GitHub/Craywatch-Rapport/R/data/intermediate/", test_set$key))
-# path=paste0("~/GitHub/Craywatch-Rapport/R/data/intermediate/", test_set$key,"/occurrence.txt")
-# 
-# CF_occ<-read.delim(path, header=TRUE)
-# 
-# years<-unique(CF_occ$year)
-# species_names<-unique(CF_occ$species)
-# 
-# occ_gbif <- st_as_sf(CF_occ, coords = c("decimalLongitude", "decimalLatitude"),
-#                         crs = "+proj=longlat +datum=WGS84")
-# 
-# occ_gbif <- occ_gbif %>%
-#   mutate(decimalLongitude = sf::st_coordinates(.)[,1],
-#          decimalLatitude = sf::st_coordinates(.)[,2]) %>%
-#   st_drop_geometry()
-# 
-# write_csv(occ_gbif, "~/GitHub/Craywatch-Rapport/R/data/input/gbif/gbif_occ_CF.csv")
-# writeLines(download_doi, con = "~/GitHub/Craywatch-Rapport/R/data/input/gbif/gbif_download_doi.txt")
+# --- 1. Data inlezen ---
+# paden uit config.R 
+craywatch_raw <- read_csv(file_craywatch_validated, show_col_types = FALSE) #raw CW data
+map_data      <- read_csv(file_localities_map, show_col_types = FALSE) #localities.csv
+gbif_raw      <- read_csv(file_gbif_occurrences, show_col_types = FALSE)
 
+# Shapefiles laden (quiet = TRUE zorgt voor minder output in je console)
+watervlakken  <- st_read(file_watervlakken, quiet = TRUE)
+vha_catc      <- st_read(file_vha_catc, quiet = TRUE)
+bekken        <- st_read(file_bekken, quiet = TRUE)
 
-############ 2. Construct Crayfish analysis data file ###############
-# read craywatch validated data, localities.csv gbif_occ 
-craywatch_data <- read.csv("./data/input/craywatch_data.csv") #10.5281/zenodo.17639074
-map_data <- read.csv("../craywatch/assets/localities.csv")
-gbif_data <- read.csv("./data/input/gbif/gbif_occ_CF.csv")
+# --- 2. verwerking CW data ---
 
-# Create session nr (nr) per locID (> 1 x sampled)
-# all sampled with interval >7 days is a seperate sampling session
-craywatch_data$date <- dmy(craywatch_data$date) # Converteer naar datum
-craywatch_data <- craywatch_data %>%
-    arrange(locID, date) %>%
-    filter(str_detect(locID, "^[A-Z]_[0-9]{4}_[0-9]+$")) %>% #remove faulty locID
-    group_by(locID) %>%
-    mutate(
-      date_diff = c(0, diff(date)),
-      session_nr = cumsum(date_diff > 7)
-    ) %>%
-    ungroup() 
+# Sessie nummer creëren per locID (>1 sammpling event)
+# Criterion: all samples  with  >7 days sampling interval = seperate sampling session
+# Sessies identificeren
+craywatch_data <- craywatch_raw %>%
+  mutate(date = dmy(date)) %>%
+  arrange(locID, date) %>%
+  filter(str_detect(locID, "^[A-Z]_[0-9]{4}_[0-9]+$")) %>% 
+  group_by(locID) %>%
+  mutate(
+    date_diff = c(0, diff(date)),
+    session_nr = cumsum(date_diff > cray_session_gap_days)
+  ) %>%
+  ungroup()
 
-# df with locID, session_nr, date, soort, individuals- & traps_daily, vrijwillID
+# Aggregeer data 
 daily_data <- craywatch_data %>%
   group_by(locID, session_nr, date, soort) %>%
   summarize(
@@ -121,7 +49,7 @@ daily_data <- craywatch_data %>%
          
 # Group daily data
 # remove all unvalid absences (<12 trapdays in water)
-# keep all rows where one specimen is caught
+# keep all rows where minimum one specimen is caught
 grouped_craywatch_data <- daily_data %>%
   group_by(locID, session_nr, soort) %>%  # Groepeer per locatie, sessie en soort
   summarize(
@@ -131,24 +59,25 @@ grouped_craywatch_data <- daily_data %>%
     end_date = max(date, na.rm = TRUE),
     consecutive = {
       date_diff <- diff(sort(unique(date)))
-      all(date_diff == 1)
+      all(date_diff == 1) #add consecutive data for later analysis (evaluation of protocol execution)
     },
     traps_used = sum(traps_daily, na.rm = TRUE),
     .groups = 'drop',
     vrijwillID = first(vrijwillID),
   ) %>%
-  dplyr::filter((soort == "crayfish indet" & traps_used >= 12) | (soort != "crayfish indet")) %>% # Filter rijen die aan het protocol voldoen
+  dplyr::filter((soort == "crayfish indet" & traps_used >= 12) | 
+                (soort != "crayfish indet")) %>% # Filter rijen die aan het protocol voldoen
   select(-session_nr) # remove session_nr
 
-# Add columns latlongs from map_data to grouped_craywatch_data
+# Add coordinates from map_data 
 grouped_craywatch_data <- grouped_craywatch_data %>%
   left_join(
     map_data %>% select(locID, Latitude, Longitude),
     by = "locID"
   ) %>%
   mutate(
-    latitude  = as.numeric(Latitude),
-    longitude = as.numeric(Longitude)
+    Latitude  = as.numeric(Latitude),
+    Longitude = as.numeric(Longitude)
   )
 
 # # Maak GIS-laag
@@ -157,7 +86,15 @@ grouped_craywatch_data <- grouped_craywatch_data %>%
 # st_write(craywatch_sf, "~/GitHub/craywatch/R/data/output/GIS-laag/craywatch_results.gpkg", layer = "craywatch_observations", append=FALSE)
 
 
-######## 3. combineer tot analyze dataset #########
+
+
+
+######## 3. Transformeer naar wide formaat #########
+# Soorten die in df moeten staan
+required_species <- read_csv(file_gbif_occurrences, show_col_types = FALSE) %>%
+  distinct(species)
+#
+
 craywatch_processed <- grouped_craywatch_data %>%
   mutate(
     dat.source = "craywatch_data",

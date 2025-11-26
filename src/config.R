@@ -165,8 +165,6 @@ max_link_distance_m <- 10
 # GBIF: groeperingseenheid
 gbif_group_by_fields <- c("year", "month", "day", "latitude", "longitude", "species", "dat.source")
 
-# Craywatch: velden om dagelijkse data tot sessieniveau te aggregeren
-cray_group_fields_daily <- c("locID", "session_nr", "date", "soort")
 
 cray_group_fields_session <- c("locID", "session_nr", "soort")
 
