@@ -133,5 +133,7 @@ crs_lambert <- 1370 # Belgische Lambert 72
 # Maximale afstand (m) tot dichtstbijzijnde waterloop/watervlak om VHAG/CATC/WVLC toe te kennen
 max_link_distance_m <- 50
 
-
+# URL voor WFS/API Deelbekken (Watersystemen)
+# OGC API Features URL (Geopunt) - Collectie: WsDeelbek
+url_wfs_deelbekken <- "https://geo.api.vlaanderen.be/Watersystemen/ogc/features/collections/WsDeelbek/items?f=json&limit=5000"
 
