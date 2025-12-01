@@ -1,5 +1,5 @@
 # ====================================================
-# Scriptnaam: 07_sbz_leaflet_bis.R
+# Scriptnaam: 07_sbz_leaflet.R
 # Doel: Genereren van de integrale interactieve kaart voor beschermingsstatussen.
 #
 # Beschrijving:
