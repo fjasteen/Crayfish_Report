@@ -13,7 +13,7 @@ if (!exists("file_n2000_habitats")) {
 
 message("--- Start laden ruimtelijke data (Lagen & Soorten) ---")
 
-# 1. Natura 2000
+# 1. Natura 2000 (enkel als laag voor leaflet, niet voor statische kaart)
 # ----------------------------------------------------
 if (!exists("natura_2000_aq")) { 
   message("Laden Natura 2000...")
@@ -33,11 +33,6 @@ if (!exists("hbtrl_aq")) {
   
   if (is.na(st_crs(hbtrl))) st_crs(hbtrl) <- crs_lambert
   hbtrl <- st_transform(hbtrl, crs_lambert)
-  
-  # Filteren op overlap met aquatische N2000
-  hbtrl_aq <- hbtrl %>%
-    st_filter(natura_2000_aq, .predicate = st_intersects) %>%
-    mutate(habitat_id = row_number())
 }
 
 # 3. Soortenbeschermingsprogramma's (SBP)
