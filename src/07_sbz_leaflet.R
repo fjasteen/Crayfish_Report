@@ -1,10 +1,28 @@
 # ====================================================
 # Scriptnaam: 08_sbz_leaflet_bis.R
+# Doel: Genereren van de integrale interactieve kaart voor beschermingsstatussen.
+#
 # Beschrijving:
-# - Genereert één integrale interactieve kaart.
-# - UI: Custom HTML Paneel rechtsonder (Analyse -> Soort).
-# - UI: Contextlagen worden automatisch geschakeld via JS (geen checkboxes meer).
-# - LOGICA: Mutueel exclusief (geen overlap van punten).
+# Dit script bouwt een leaflet die de verspreiding van rivierkreeften toont
+# in relatie tot beschermde gebieden (Habitatrichtlijn & Soortenbeschermingsprogramma's).
+#
+# Belangrijkste functionaliteiten:
+# 1. Dataverwerking:
+#    - Koppelt waarnemingen ruimtelijk aan beschermde gebieden (SBZ-H & SBP)
+#    - Berekent "wolken" (populatieclusters) rond waarnemingen om onzekerheid weer te geven
+#    - Bepaalt status per wolk: "In gebied", "Nabij (<1km)" of "Overig"
+#    - Sorteert polygonen op grootte zodat kleine gebieden zichtbaar blijven boven grote
+#
+# 2. User Interface:
+#    - implementeert een Custom HTML/JS controlepaneel voor hiërarchische selectie,
+#      noodzakelijk om hiërarchische selectie mogelijk te maken
+#      a. type analyse (Habitatrichtlijn vs. SBP)
+#      b. resultaten voor een specifieke soort
+#
+# 3. Visualisatie:
+#    - consistente kleurcodering per soort.
+#    - Visueel onderscheid tussen aanwezigheid (polygonen) en nulvangsten (stippen)
+#    - Polygonen (aanwezigheden) zijn gekleurd volgens status
 # ====================================================
 
 # --- 0. Instellingen & Data laden ---
@@ -21,14 +39,14 @@ if(!exists("CF_long")) source("./src/05_load_aq_sbz.R")
 
 message("--- Start genereren Integrale Leaflet Kaart (Versie: Auto-Context Switch) ---")
 
-# --- 1. Data Preparatie: Afwezigheden (True Absences) ---
+# --- 1. Data voorbereiden: echte afwezigheden (Craywatch 12 absences ) ---
 message("Verwerken van afwezigheden...")
 
 CF_absence_sf <- CF_long %>%
   filter(presence == 0) %>%
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
 
-# --- 2. Data Preparatie: Analyse-Unions ---
+# --- 2. Data voorbereiden:  ---
 message("Creëren van Analyse-lagen...")
 
 ensure_multipolygon <- function(sf_object) {
@@ -40,10 +58,10 @@ ensure_multipolygon <- function(sf_object) {
     st_make_valid()
 }
 
-# 1. Habitatrichtlijn
+# 1. Habitatrichtlijngebied
 hbtrl_calc <- hbtrl %>% st_transform(crs_lambert) %>% ensure_multipolygon()
 
-# 2. SBP Gebieden
+# 2. SBP gebied
 sbp_pgs_calc <- sbp_pgs_aq %>% st_transform(crs_lambert) %>% ensure_multipolygon()
 
 # 3. SBP beekvissen 
@@ -63,11 +81,11 @@ if(nrow(sbp_pgs_calc) > 0) geoms_sbp[[1]] <- st_geometry(sbp_pgs_calc)
 if(nrow(sbp_vissen_calc) > 0) geoms_sbp[[2]] <- st_geometry(sbp_vissen_calc)
 if(length(geoms_sbp) > 0) { union_sbp <- st_union(do.call(c, geoms_sbp)) } else { union_sbp <- st_polygon() }
 
-# --- 3. Functie voor Statusbepaling ---
+# --- 3. Functie voor statusbepaling ---
 calculate_cloud_status <- function(points, reference_geom, layer_name) {
   if(nrow(points) == 0) return(NULL)
   
-  # A. Wolken vormen
+  # A. Wolken (populatieclusters) vormen
   clouds <- points %>% st_buffer(100) %>% st_union() %>% st_cast("POLYGON") %>% st_sf()
   
   if(nrow(clouds) == 0) return(NULL)
@@ -89,12 +107,12 @@ calculate_cloud_status <- function(points, reference_geom, layer_name) {
     return(clouds)
   }
   
-  # 1. Check Overlap
+  # 1. Check overlap
   intersect_matrix <- st_intersects(clouds, reference_geom, sparse = FALSE)
   if(length(intersect_matrix) == 0) { is_inside <- rep(FALSE, nrow(clouds)) } 
   else { is_inside <- intersect_matrix[,1] }
   
-  # 2. Check Nabijheid
+  # 2. Check nabijheid
   is_nearby <- rep(FALSE, nrow(clouds))
   idx_not_inside <- which(!is_inside)
   if(length(idx_not_inside) > 0) {
@@ -120,7 +138,7 @@ calculate_cloud_status <- function(points, reference_geom, layer_name) {
     st_transform(4326)
 }
 
-# --- 4. Berekenen Wolken ---
+# --- 4. Berekenen van populatieclusters, i.e. zgn 'wolken' door buffer 100m ---
 message("Berekenen wolken...")
 clouds_hbtrl_list <- list()
 clouds_sbp_list   <- list()
@@ -152,14 +170,14 @@ for (sp in unique_species) {
   }
 }
 
-# --- 5. Genereren Leaflet Kaart ---
+# --- 5. Genereren leaflet  ---
 message("Kaart opbouwen...")
 
 map <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) 
 
-# --- A. Contextlagen (Standaard in Leaflet Control) ---
-# Belangrijk: De group names moeten exact matchen met wat we in JS gebruiken.
+# --- A. Contextlagen sbz---
+# Pas op! De group names moeten exact matchen met wat we in JS gebruiken.
 grp_context_hbtrl <- "Context: Habitatrichtlijn"
 grp_context_sbp   <- "Context: SBP"
 
@@ -179,7 +197,7 @@ map <- map %>%
 
 map <- map %>%
   addPolygons(
-    ddata = sbp_pgs_calc %>% 
+    data = sbp_pgs_calc %>% 
       mutate(area = st_area(.)) %>% 
       arrange(desc(area)) %>%  #grootste polygonen onderaan
       st_transform(4326),
@@ -203,7 +221,7 @@ for (i in seq_along(unique_species)) {
   dutch_name <- species_labels_dutch[sp]
   if(is.na(dutch_name)) dutch_name <- sp
   
-  # Code voor ID (geen spaties)
+  # Code voor ID 
   sp_code <- gsub(" ", "_", sp)
   if(i == 1) first_sp_code <- sp_code
   
@@ -222,7 +240,7 @@ for (i in seq_along(unique_species)) {
   sp_absences <- CF_absence_sf %>% filter(species == sp)
   abs_popup <- paste0("<b>Soort:</b> ", dutch_name, "<br><b>Type:</b> Afwezigheid (0)<br><b>Datum:</b> ", sp_absences$date)
   
-  # --- LAAG 1: SBZ-H Resultaten ---
+  # --- LAAG 1: SBZ-H resultaten ---
   grp_sbz <- paste0("SBZ_", sp_code)
   if (!is.null(clouds_hbtrl_list[[sp]])) {
     dat <- clouds_hbtrl_list[[sp]]
@@ -240,7 +258,7 @@ for (i in seq_along(unique_species)) {
     }
   }
   
-  # --- LAAG 2: SBP Resultaten ---
+  # --- LAAG 2: SBP resultaten ---
   grp_sbp <- paste0("SBP_", sp_code)
   if (!is.null(clouds_sbp_list[[sp]])) {
     dat <- clouds_sbp_list[[sp]]
@@ -260,7 +278,7 @@ for (i in seq_along(unique_species)) {
 }
 
 
-# --- D. Custom HTML Control Panel (Uniforme Leaflet Style) ---
+# --- D. HTML controlepanel om hiërarchische selectie toe te laten  ---
 custom_panel_html <- paste0(
   '<div id="custom-analysis-control" style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 12px; min-width: 220px;">',
   
@@ -346,7 +364,7 @@ map <- map %>%
     ")
   )
 
-# Legende (linksonder)
+# Legende
 map <- map %>%
   addControl(
     html = paste0(
