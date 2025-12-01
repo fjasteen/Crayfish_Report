@@ -80,22 +80,14 @@ plot_protected_map <- function(base_layer, points_layer, outfile,
   message(paste("Kaart opgeslagen:", outfile))
 }
 
-
-# 1. aquatische natura2000 
-plot_protected_map(
-  base_layer = natura_2000_aq,
-  points_layer = CF_presence,
-  outfile = file.path(dir_bescherming_output, "map_natura_2000.png")
-)
-
-# 2. habitatrichtlijn 
+# 1. habitatrichtlijn 
 plot_protected_map(
   base_layer = hbtrl,
   points_layer = CF_presence,
   outfile = file.path(dir_bescherming_output, "map_hbtrl.png")
 )
 
-# 3. SBP 
+# 2. SBP 
 # Hier splitsen we de lagen op in base_layer & line_layer (vis)
 plot_protected_map(
   base_layer   = sbp_pgs_aq,     # De groene vlakken
