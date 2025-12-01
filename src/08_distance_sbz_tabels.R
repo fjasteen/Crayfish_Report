@@ -1,5 +1,5 @@
 # ====================================================
-# Scriptnaam: 06_sbz_analyse_afstanden.R
+# Scriptnaam: 08_sbz_analyse_afstanden.R
 # Beschrijving: 
 # - DEBUG-VERSIE: Voert de analyse enkel uit voor Natura 2000 (HAB1).
 # - De code is lineair gemaakt om stap-voor-stap te kunnen debuggen.
