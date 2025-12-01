@@ -6,13 +6,13 @@
 required_packages <- c(
   "here",       # Relatieve paden
   "sf",         # Ruimtelijke data
-  "dplyr",      # Data manipulatie
-  "tidyr",      # Data reshaping
+  "dplyr",      
+  "tidyr",      
   "lubridate",  # Datums
   "readr",      # CSV lezen/schrijven
-  "stringr",    # String manipulatie
+  "stringr",    
   "rgbif",      # GBIF API
-  "leaflet",     # Interactieve kaarten
+  "leaflet",    # Interactieve kaarten
   "ggplot2",
   "htmltools"
 )
@@ -57,24 +57,21 @@ invisible(lapply(required_dirs, function(x) {
 file_craywatch_validated <- file.path(dir_data_input, "craywatch_data.csv") # 10.5281/zenodo.17639074
 file_localities_map      <- file.path(dir_craywatch_assets, "localities.csv")
 
-# Shapefiles (Zorg dat deze namen kloppen met je bestanden op schijf)
+# Shapefiles 
 file_vlaanderen_grenzen <- file.path(dir_shapefiles, "grenzenvlaanderen.shp")
 file_watervlakken       <- file.path(dir_shapefiles, "watervlakken.shp")
 file_vha_catc           <- file.path(dir_shapefiles, "vhaCattraj.shp")
 file_bekken             <- file.path(dir_shapefiles, "Wsbekken.shp")
 
 # Shapefiles gebruikt in ruimtelijke analyse
-file_n2000_habitats <- file.path(dir_shapefiles, "BwkHab.shp") # Natura 2000
+file_n2000_habitats <- file.path(dir_shapefiles, "BwkHab.shp") # natura2000
 file_3260_habitats  <- file.path(dir_shapefiles, "Hab3260.shp") #Ranunculoides hab 3260
 
-file_hoofdrivieren  <- file.path(dir_shapefiles, "hoofdrivieren.shp") # Hoofdrivieren
-file_kanalen        <- file.path(dir_shapefiles, "kanalen.shp") # Kanalen
-file_gemeenten      <- file.path(dir_shapefiles, "gemeenten.shp") # Gemeentegrenzen
+file_hoofdrivieren  <- file.path(dir_shapefiles, "hoofdrivieren.shp") # rivieren
+file_kanalen        <- file.path(dir_shapefiles, "kanalen.shp") # kanalen
+file_gemeenten      <- file.path(dir_shapefiles, "gemeenten.shp") # gemeentegrenzen
 
 ## ---------- 4. Bestanden: Intermediate (RDS) ----------
-# zorgt dat script 01, 02 en 03 met elkaar kunnen praten via bestanden
-# RDS is sneller en behoudt datatypes beter dan CSV.
-
 file_inter_craywatch_clean <- file.path(dir_data_intermediate, "craywatch_clean.rds")
 file_inter_gbif_processed  <- file.path(dir_data_intermediate, "gbif_processed.rds")
 
@@ -145,7 +142,7 @@ crs_wgs84   <- 4326 #GPS
 crs_lambert <- 31370 # Belgische Lambert 72
 
 # Maximale afstand (m) tot dichtstbijzijnde waterloop/watervlak om VHAG/CATC/WVLC toe te kennen
-max_link_distance_m <- 50
+max_link_distance_m <- 50 #(Zou 100m moeten zijn omwille van coordinate uncertainty)
 
 # URL voor WFS/API Deelbekken (Watersystemen)
 # OGC API Features URL (Geopunt) - Collectie: WsDeelbek

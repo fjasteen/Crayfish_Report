@@ -1,10 +1,9 @@
 # ====================================================
-# Scriptnaam: src/laad_ruimtelijke_data.R
+# Scriptnaam: src/05_load_aq_sbz.R
 # Beschrijving: 
 # - Laadt alle ruimtelijke beschermingslagen (N2000, SBP, HBTRL)
 # - Laadt en verwerkt de kreeftendata (CF_presence)
 # - Transformeert alles naar CRS Lambert (31370)
-# - Filtert op aquatische habitats/soorten
 # ====================================================
 
 # We gaan ervan uit dat config.R al geladen is door het moederscript
@@ -66,22 +65,41 @@ if (!exists("sbp_vissen")) {
 
 # 4. Kreeftendata (Analysedataset)
 # ----------------------------------------------------
-# Dit stond eerst dubbel in script 05 en 06. Nu centraal.
 if (!exists("CF_presence")) {
   message("Laden Kreeftendata & Transformatie...")
   
+  # Lees CSV
   CF_data_raw <- readr::read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
+  
+  # FIX: Forceer alle kolomnamen naar kleine letters
+  # Dit lost het probleem op als de kolom 'Date', 'DATE' of 'date' heet
+  names(CF_data_raw) <- tolower(names(CF_data_raw))
+  
+  # Check of 'date' kolom bestaat (eventueel hernoemen van 'datum')
+  if(!"date" %in% names(CF_data_raw) && "datum" %in% names(CF_data_raw)) {
+    CF_data_raw <- CF_data_raw %>% rename(date = datum)
+  }
+  
+  if(!"date" %in% names(CF_data_raw)) {
+    stop("Fout: Geen kolom 'date' of 'datum' gevonden in de dataset!")
+  }
   
   # Zorg dat kolomnamen matchen met config
   species_columns <- tolower(gbif_species)
   
   # Van Wide naar Long format
   CF_long <- CF_data_raw %>%
+    # Selecteer kolommen (nu zeker met kleine letters)
     select(
       dat.source,
       date,
-      Longitude, Latitude,
+      longitude, latitude,
       all_of(species_columns)
+    ) %>%
+    # Datum conversie (veilig)
+    mutate(
+      # Als read_csv het al als Date herkende, doe niets. Anders parse.
+      date = if(inherits(date, "Date")) date else lubridate::ymd(date)
     ) %>%
     pivot_longer(
       cols      = all_of(species_columns),
@@ -100,11 +118,8 @@ if (!exists("CF_presence")) {
   # Omzetten naar SF object (Punten) en transformeren naar Lambert
   CF_presence <- CF_long %>%
     filter(presence == 1) %>%
-    st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>%
+    st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
     st_transform(crs_lambert)
-  
-  # Optioneel: Ook de afwezigheden bewaren als je die nodig hebt
-  # CF_absence <- CF_long %>% filter(presence == 0) ...
 }
 
 message("--- Alle data succesvol geladen ---")

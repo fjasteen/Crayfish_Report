@@ -18,12 +18,12 @@ source("./src/05_load_aq_sbz.R")
 
 message("Start ruimtelijke analyse (Wolken & Afstanden) voor Natura 2000...")
 
-# --- Instellen van de Laag ---
+# --- Instellen van de laag --- # MOET ALS VECTOR PER LAAG WORDEN OPGESTELD IN CONFIG
 CRS_PROJECTED <- 31370
 unieke_soorten <- unique(CF_presence$species)
 beschermde_laag <- natura_2000_aq
 label_kolom <- "HAB1"
-gebied_naam <- 
+gebied_naam <- " "
 laag_naam <- "Natura 2000"
 
 # Zorg dat de label-kolom beschikbaar is als generieke 'gebied_label'
