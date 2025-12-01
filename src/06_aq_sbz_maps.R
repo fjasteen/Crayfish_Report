@@ -3,8 +3,8 @@
 # Auteur: Frédérique Steen
 # Datum: 27-11-2025 (Updated)
 # Beschrijving: 
-# - Analyseert overlap met beschermde gebieden (N2000, SBP, HBTRL)
-# - Genereert statische kaarten (PNG) en interactieve kaarten (Leaflet)
+# - Genereert statische kaarten voor het rapport
+# - Gebruikt SBZ-H en SBP 
 # ====================================================
 
 # --- 0. Instellingen laden ---
