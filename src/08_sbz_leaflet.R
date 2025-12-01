@@ -179,16 +179,19 @@ map <- map %>%
 
 map <- map %>%
   addPolygons(
-    data = sbp_pgs_calc %>% st_transform(4326),
+    ddata = sbp_pgs_calc %>% 
+      mutate(area = st_area(.)) %>% 
+      arrange(desc(area)) %>%  #grootste polygonen onderaan
+      st_transform(4326),
     color = "blue", weight = 1.0, fillColor = "blue", fillOpacity = 0.2,
     group = grp_context_sbp,
-    popup = ~paste("<b>SBP:</b>", sbp)
+    popup = ~paste("<b>Soort:</b>", soort, "<br><b>Gebied:</b>", gebied)
   ) %>%
   addPolylines(
     data = sbp_vissen_calc %>% st_transform(4326), 
     color = "blue", weight = 2, opacity = 0.6,
     group = grp_context_sbp,
-    popup = "SBP beekvissen"
+    popup = ~paste("<b>Soort:</b>", soort, "<br><b>Gebied:</b>", gebied)
   )
 
 # --- B. Soortenlagen  ---

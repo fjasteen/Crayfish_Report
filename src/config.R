@@ -153,8 +153,7 @@ url_sbp_pls <- "https://www.mercator.vlaanderen.be/raadpleegdienstenmercatorpubl
 
 # Filter voor aquatische habitats en soorten
 aqua_habcodes <- c('3270', '3260', '3130', '3110', '3140', '3150', '3160', '7230')
-aquatische_sbp <- c('Grote modderkruiper', 'Poelkikker', 'Kamsalamander', 'Vroedmeesterpad', 'Heikikker', 'Rugstreeppad', 'Boomkikker', 'Otter', 'Knoflookpad')
-
+aquatische_sbp <- c('Grote modderkruiper', 'Poelkikker', 'Kamsalamander', 'Vroedmeesterpad', 'Heikikker', 'Rugstreeppad', 'Boomkikker', 'Knoflookpad')
 
 # Uniforme kleurenschaal over rapport
 species_colors <- c(
