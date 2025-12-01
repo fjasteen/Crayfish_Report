@@ -20,7 +20,7 @@
 #      b. resultaten voor een specifieke soort
 #
 # 3. Visualisatie:
-#    - consistente kleurcodering per soort.
+#    - consistente kleurcodering per soort
 #    - Visueel onderscheid tussen aanwezigheid (polygonen) en nulvangsten (stippen)
 #    - Polygonen (aanwezigheden) zijn gekleurd volgens status
 # ====================================================
