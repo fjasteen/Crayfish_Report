@@ -171,7 +171,7 @@ data_vangstsucces <- cray_long %>%
 # 2. Bepaal de maximale waarde voor de Y-as limiet
 max_y <- max(data_vangstsucces$percentage, na.rm = TRUE)
 
-# 3. Plotten
+# 3. Plot
 p_vangstsucces <- ggplot(data_vangstsucces, aes(x = dutch_name, y = percentage, fill = type_urban)) +
   geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7) +
   
@@ -191,7 +191,7 @@ p_vangstsucces <- ggplot(data_vangstsucces, aes(x = dutch_name, y = percentage, 
   labs(
     title = "Vangstkans voor een soort per type verstedelijking",
     subtitle = "op basis van de gestandaardiseerde monitoring",
-    y = "Vangstskans per bemonstering (%)",
+    y = "Vangstskans (%)",
     x = "", fill = ""
   ) +
   theme_minimal() + 
