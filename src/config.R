@@ -47,12 +47,13 @@ dir_watertype_output <- file.path(dir_data_output, "watertype")
 dir_maps_output <- file.path(dir_data_output, "maps")
 dir_maps_cpue   <- file.path(dir_data_output, "maps", "cpue")
 dir_gridcell_output <- file.path(dir_data_output, "gridcell")
+dir_citizen_stats_output <- file.path(dir_data_output, "citizen_stats")
 
 required_dirs <- c(
   dir_data_input, dir_data_intermediate, dir_data_output,dir_bescherming_output,
   dir_gbif_input, dir_gbif_intermediate, dir_shapefiles,
   dir_craywatch_output, dir_urbanisation_output, dir_watertype_output,
-  dir_maps_output, dir_maps_cpue, dir_gridcell_output
+  dir_maps_output, dir_maps_cpue, dir_gridcell_output, dir_citizen_stats_output
 )
 
 invisible(lapply(required_dirs, function(x) {
