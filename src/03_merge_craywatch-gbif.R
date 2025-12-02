@@ -135,7 +135,7 @@ dataset_analyse <- full_dataset_sf %>%
   
   # Selecteer de uiteindelijke kolommen
   select(
-    dat.source, year, date, Latitude, Longitude, 
+    dat.source, locID, year, date, Latitude, Longitude, 
     VHAG, CATC, WVLC, BEKNR, BEKNAAM, distances,
     all_of(required_species), starts_with("CPUE_")
   )
