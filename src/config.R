@@ -14,7 +14,8 @@ required_packages <- c(
   "rgbif",      # GBIF API
   "leaflet",    # Interactieve kaarten
   "ggplot2",
-  "htmltools"
+  "htmltools",
+  "ggpattern"
 )
 
 
@@ -43,10 +44,15 @@ dir_craywatch_assets  <- file.path(root_craywatch_app, "assets")
 dir_urbanisation_output <- file.path(dir_data_output, "urbanisation")
 dir_watertype_output <- file.path(dir_data_output, "watertype")
 
+dir_maps_output <- file.path(dir_data_output, "maps")
+dir_maps_cpue   <- file.path(dir_data_output, "maps", "cpue")
+dir_gridcell_output <- file.path(dir_data_output, "gridcell")
+
 required_dirs <- c(
   dir_data_input, dir_data_intermediate, dir_data_output,dir_bescherming_output,
   dir_gbif_input, dir_gbif_intermediate, dir_shapefiles,
-  dir_craywatch_output, dir_urbanisation_output, dir_watertype_output
+  dir_craywatch_output, dir_urbanisation_output, dir_watertype_output,
+  dir_maps_output, dir_maps_cpue, dir_gridcell_output
 )
 
 invisible(lapply(required_dirs, function(x) {
@@ -88,7 +94,7 @@ file_gbif_occurrences      <- file.path(dir_gbif_input, "gbif_occ_CF.csv")
 file_analyse_dataset_rapport   <- file.path(dir_data_output, "analyse_dataset.csv")
 file_analyse_dataset_craywatch <- file.path(dir_craywatch_output, "analyse_dataset.csv")
 
-# Output paden voor kaarten 
+# Output paden voor kaarten sbz
 file_map_hbtrl <- file.path(dir_bescherming_output, "map_hbtrl.png")
 file_map_sbp <- file.path(dir_bescherming_output, "map_sbp.png")
 
