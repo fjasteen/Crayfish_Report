@@ -41,11 +41,12 @@ dir_craywatch_output  <- file.path(root_craywatch_app, "R", "data", "output")
 dir_craywatch_assets  <- file.path(root_craywatch_app, "assets")
 
 dir_urbanisation_output <- file.path(dir_data_output, "urbanisation")
+dir_watertype_output <- file.path(dir_data_output, "watertype")
 
 required_dirs <- c(
   dir_data_input, dir_data_intermediate, dir_data_output,dir_bescherming_output,
   dir_gbif_input, dir_gbif_intermediate, dir_shapefiles,
-  dir_craywatch_output, dir_urbanisation_output
+  dir_craywatch_output, dir_urbanisation_output, dir_watertype_output
 )
 
 invisible(lapply(required_dirs, function(x) {
@@ -87,15 +88,19 @@ file_gbif_occurrences      <- file.path(dir_gbif_input, "gbif_occ_CF.csv")
 file_analyse_dataset_rapport   <- file.path(dir_data_output, "analyse_dataset.csv")
 file_analyse_dataset_craywatch <- file.path(dir_craywatch_output, "analyse_dataset.csv")
 
-# Output paden voor kaarten (worden nu in /bescherming geplaatst)
+# Output paden voor kaarten 
 file_map_hbtrl <- file.path(dir_bescherming_output, "map_hbtrl.png")
 file_map_sbp <- file.path(dir_bescherming_output, "map_sbp.png")
 
-# Output plot bestanden (handig als je deze later in een RMarkdown rapport inlaadt)
+# Output plot bestanden voor stedelijk type
 file_plot_urban_distributie <- file.path(dir_urbanisation_output, "plot_urban_distributie.png")
 file_plot_urban_community   <- file.path(dir_urbanisation_output, "plot_urban_community.png")
 file_plot_urban_vangstsucces<- file.path(dir_urbanisation_output, "plot_urban_vangstsucces.png")
 
+# Output plot bestanden voor watertype
+file_plot_water_distributie  <- file.path(dir_watertype_output, "plot_water_distributie.png")
+file_plot_water_community    <- file.path(dir_watertype_output, "plot_water_community.png")
+file_plot_water_vangstsucces <- file.path(dir_watertype_output, "plot_water_vangstsucces.png")
 
 ## ---------- 6. GBIF download instellingen ----------
 gbif_species <- c(
@@ -216,7 +221,7 @@ get_baseplot <- function() {
 }
 
 
-## ---------- Urbanisatie Instellingen ----------
+## ---------- Urbanisatie instellingen ----------
 # Factor levels 
 urban_levels <- c("landelijk", "randstedelijk", "verstedelijkt")
 
@@ -225,4 +230,15 @@ urban_colors <- c(
   "landelijk"     = "#1B5E20", 
   "randstedelijk" = "#A29B63", 
   "verstedelijkt" = "#707070" 
+)
+
+
+## ---------- watertype instellingen ----------
+# Factor levels
+water_levels <- c("gesloten", "open")
+
+# Kleurenpalet 
+water_colors <- c(
+  "gesloten" = "#2A5959", 
+  "open"   = "#2A8C8C"  
 )
