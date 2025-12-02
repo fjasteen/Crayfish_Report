@@ -217,10 +217,10 @@ get_baseplot <- function() {
 
 
 ## ---------- Urbanisatie Instellingen ----------
-# Factor levels (zodat de volgorde altijd Landelijk -> Rand -> Stad is)
+# Factor levels 
 urban_levels <- c("landelijk", "randstedelijk", "verstedelijkt")
 
-# Kleurenpalet (Consistentie in grafieken én kaarten)
+# Kleurenpalet urbanisatie
 urban_colors <- c(
   "landelijk"     = "#1B5E20", 
   "randstedelijk" = "#A29B63", 
