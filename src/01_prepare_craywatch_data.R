@@ -120,7 +120,7 @@ craywatch_calculated <- craywatch_joined %>%
 # Naar wide format
 craywatch_wide <- craywatch_calculated %>%
   select(
-    locID, session_nr, dat.source, year, date, 
+    locID, vrijwillID, session_nr, dat.source, year, date, 
     Latitude, Longitude, trapdays, 
     species, pres_final, cpue_val
   ) %>%
