@@ -66,6 +66,7 @@ gbif_wide <- gbif_clean %>%
   transmute( 
     locID      = NA_character_,
     session_nr = NA_character_,
+    vrijwillID = NA_character_,
     dat.source = "gbif_data",
     year       = year,
     date       = make_date(year, month, day),
@@ -135,7 +136,7 @@ dataset_analyse <- full_dataset_sf %>%
   
   # Selecteer de uiteindelijke kolommen
   select(
-    dat.source, locID, year, date, Latitude, Longitude, 
+    dat.source, locID, session_nr, vrijwillID, year, date, Latitude, Longitude, 
     VHAG, CATC, WVLC, BEKNR, BEKNAAM, distances,
     all_of(required_species), starts_with("CPUE_")
   )
