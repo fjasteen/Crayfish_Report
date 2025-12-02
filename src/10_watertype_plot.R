@@ -391,3 +391,7 @@ print(doc, target = output_word)
 
 message(paste("Clean word rapport opgeslagen:", output_word))
 shell.exec(output_word)
+
+# --- 4. Opslaan data voor Script 11 ---
+saveRDS(cray_long, file.path(dir_data_intermediate, "cray_long_watertype.rds"))
+message("Dataframe 'cray_long' opgeslagen als RDS voor gebruik in script 11.")
