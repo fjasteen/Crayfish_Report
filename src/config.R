@@ -40,11 +40,12 @@ dir_shapefiles        <- file.path(dir_data_input, "shapefiles")
 dir_craywatch_output  <- file.path(root_craywatch_app, "R", "data", "output")
 dir_craywatch_assets  <- file.path(root_craywatch_app, "assets")
 
+dir_urbanisation_output <- file.path(dir_data_output, "urbanisation")
 
 required_dirs <- c(
   dir_data_input, dir_data_intermediate, dir_data_output,dir_bescherming_output,
   dir_gbif_input, dir_gbif_intermediate, dir_shapefiles,
-  dir_craywatch_output
+  dir_craywatch_output, dir_urbanisation_output
 )
 
 invisible(lapply(required_dirs, function(x) {
@@ -71,6 +72,10 @@ file_hoofdrivieren  <- file.path(dir_shapefiles, "hoofdrivieren.shp") # rivieren
 file_kanalen        <- file.path(dir_shapefiles, "kanalen.shp") # kanalen
 file_gemeenten      <- file.path(dir_shapefiles, "gemeenten.shp") # gemeentegrenzen
 
+# Shapefile gebruikt voor urbanisatie
+file_urban_map <- file.path(dir_shapefiles, "verstedelijking.gpkg")
+
+
 ## ---------- 4. Bestanden: Intermediate (RDS) ----------
 file_inter_craywatch_clean <- file.path(dir_data_intermediate, "craywatch_clean.rds")
 file_inter_gbif_processed  <- file.path(dir_data_intermediate, "gbif_processed.rds")
@@ -85,6 +90,12 @@ file_analyse_dataset_craywatch <- file.path(dir_craywatch_output, "analyse_datas
 # Output paden voor kaarten (worden nu in /bescherming geplaatst)
 file_map_hbtrl <- file.path(dir_bescherming_output, "map_hbtrl.png")
 file_map_sbp <- file.path(dir_bescherming_output, "map_sbp.png")
+
+# Output plot bestanden (handig als je deze later in een RMarkdown rapport inlaadt)
+file_plot_urban_distributie <- file.path(dir_urbanisation_output, "plot_urban_distributie.png")
+file_plot_urban_community   <- file.path(dir_urbanisation_output, "plot_urban_community.png")
+file_plot_urban_vangstsucces<- file.path(dir_urbanisation_output, "plot_urban_vangstsucces.png")
+
 
 ## ---------- 6. GBIF download instellingen ----------
 gbif_species <- c(
@@ -203,3 +214,15 @@ get_baseplot <- function() {
           legend.position = "bottom",
           plot.title = element_text(face = "italic"))
 }
+
+
+## ---------- Urbanisatie Instellingen ----------
+# Factor levels (zodat de volgorde altijd Landelijk -> Rand -> Stad is)
+urban_levels <- c("landelijk", "randstedelijk", "verstedelijkt")
+
+# Kleurenpalet (Consistentie in grafieken én kaarten)
+urban_colors <- c(
+  "landelijk"     = "#1B5E20", 
+  "randstedelijk" = "#A29B63", 
+  "verstedelijkt" = "#707070" 
+)

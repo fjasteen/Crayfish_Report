@@ -1,6 +1,7 @@
 ############################################################
 # Script:    Voorkeur_urbanisatie.R
-# Doel:      Nagaan of de verschillende soorten invasieve rivierkreeften voorkomen in meer stedelijke of natuurlijkere omgevingen
+# Doel:      Nagaan of de verschillende soorten invasieve rivierkreeften voorkomen 
+# in meer stedelijke of natuurlijkere omgevingen
 # Auteur:    Margot Vermeylen
 # Datum:     21-08-2025
 ############################################################
