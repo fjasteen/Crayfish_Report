@@ -17,9 +17,9 @@ source("./src/config.R")
 # A. laad analyse dataset
 if (!file.exists(file_analyse_dataset_rapport)) stop("Run eerst script 03!")
 
-df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE) %>%
-  # filter op gekoppelde data voor consistentie
-  filter(!is.na(VHAG) | !is.na(WVLC))
+df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE) #%>%
+  # filter op gekoppelde data voor consistentie (niet nodig)
+  #filter(!is.na(VHAG) | !is.na(WVLC))
 
 # B. Verstedelijking shapefile
 file_urban_map <- file.path(dir_shapefiles, "verstedelijking.gpkg") 
