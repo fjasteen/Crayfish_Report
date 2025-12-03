@@ -18,8 +18,8 @@ if (!file.exists(file_analyse_dataset_rapport)) stop("Run eerst script 03!")
 # Dataset
 occurrences <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE) %>%
   filter(!is.na(Longitude), !is.na(Latitude)) %>%
-  # Filter op watergebonden waarnemingen (consistentie met andere scripts)
-  filter(!is.na(VHAG) | !is.na(WVLC)) %>%
+  # Filter op watergebonden waarnemingen (toch niet nodig)
+  # filter(!is.na(VHAG) | !is.na(WVLC)) %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = crs_wgs84) %>%
   st_transform(crs_lambert)
 
