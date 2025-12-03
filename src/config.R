@@ -205,22 +205,22 @@ color_scale_dutch <- scale_color_manual(values = species_colors, labels = specie
 
 # baseplot functie
 
+# Definieer de standaardkleur voor waterlopen (uniform)
+col_water_uniform <- "#6BA1D3" 
+
 get_baseplot <- function() {
   # Shapefiles inlezen
   vlaanderen <- st_read(file_vlaanderen_grenzen, quiet = TRUE) %>% st_transform(31370)
-  
-  # VHA inlezen en filteren op CATC 0 en 1
-  vha_raw <- st_read(file_vha_catc, quiet = TRUE) %>% st_transform(31370)
+  vha_raw    <- st_read(file_vha_catc, quiet = TRUE) %>% st_transform(31370)
   
   cat0 <- vha_raw %>% filter(CATC == 0) %>% st_intersection(vlaanderen)
   cat1 <- vha_raw %>% filter(CATC == 1) %>% st_intersection(vlaanderen)
   
-  # De plot constructie
   ggplot() +
     geom_sf(data = vlaanderen, fill= "#EEEEEE", size=0.2, colour= "black") +
-    # Eerst Cat 1 (dunner/lichter), dan Cat 0 (dikker/donkerder)
-    geom_sf(data = cat1, size=0.3, colour="#6BA1D3") +
-    geom_sf(data = cat0, size=0.4, colour="#004C99") +
+    # BEIDE categorieën krijgen hier dezelfde kleur (uniform)
+    geom_sf(data = cat1, size=0.3, colour=col_water_uniform) +
+    geom_sf(data = cat0, size=0.4, colour=col_water_uniform) +
     theme_void() +
     theme(legend.title = element_blank(), 
           legend.text = element_text(size=8, face="italic"), 
