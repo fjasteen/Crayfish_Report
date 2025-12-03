@@ -33,11 +33,6 @@ clip_to_vlaanderen <- function(x) {
     st_intersection(vlaanderen)
 }
 
-# Basislagen
-hoofdrivieren <- st_read(file_hoofdrivieren, quiet = TRUE) %>% clip_to_vlaanderen()
-kanalen       <- st_read(file_kanalen, quiet = TRUE) %>% clip_to_vlaanderen()
-# gemeenten     <- st_read(file_gemeenten, quiet = TRUE) %>% clip_to_vlaanderen() # Niet gebruikt in plot?
-
 # --- 2. Statische Kaarten (baseplot) ---
 base_plot <- get_baseplot()
 

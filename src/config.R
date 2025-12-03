@@ -206,19 +206,21 @@ color_scale_dutch <- scale_color_manual(values = species_colors, labels = specie
 # baseplot functie
 
 get_baseplot <- function() {
-  # Zorg dat libraries geladen zijn (sf, ggplot2)
+  # Shapefiles inlezen
+  vlaanderen <- st_read(file_vlaanderen_grenzen, quiet = TRUE) %>% st_transform(31370)
   
-  # Shapefiles inlezen (paden staan al in je config)
-  # Gebruik de variabelen die je al hebt gedefinieerd
-  vlaanderen    <- st_read(file_vlaanderen_grenzen, quiet = TRUE) %>% st_transform(31370)
-  hoofdrivieren <- st_read(file_hoofdrivieren, quiet = TRUE) %>% st_transform(31370) %>% st_intersection(vlaanderen)
-  kanalen       <- st_read(file_kanalen, quiet = TRUE) %>% st_transform(31370) %>% st_intersection(vlaanderen)
+  # VHA inlezen en filteren op CATC 0 en 1
+  vha_raw <- st_read(file_vha_catc, quiet = TRUE) %>% st_transform(31370)
+  
+  cat0 <- vha_raw %>% filter(CATC == 0) %>% st_intersection(vlaanderen)
+  cat1 <- vha_raw %>% filter(CATC == 1) %>% st_intersection(vlaanderen)
   
   # De plot constructie
   ggplot() +
     geom_sf(data = vlaanderen, fill= "#EEEEEE", size=0.2, colour= "black") +
-    geom_sf(data = hoofdrivieren, size=0.3, colour="#6BA1D3") +
-    geom_sf(data = kanalen, size=0.3, colour="#6BA1D3") +
+    # Eerst Cat 1 (dunner/lichter), dan Cat 0 (dikker/donkerder)
+    geom_sf(data = cat1, size=0.3, colour="#6BA1D3") +
+    geom_sf(data = cat0, size=0.4, colour="#004C99") +
     theme_void() +
     theme(legend.title = element_blank(), 
           legend.text = element_text(size=8, face="italic"), 

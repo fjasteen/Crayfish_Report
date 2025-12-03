@@ -2,18 +2,18 @@
 # Scriptnaam: 15_craywatch_maps.R
 # Auteur: Frédérique Steen (Geoptimaliseerd)
 # Beschrijving: 
-# - Genereert statische kaarten voor Craywatch 2024
-# - STANDAARD ACHTERGROND: VHA Categorie 0 en 1 (Uniform voor alle kaarten)
+# - Genereert statische kaarten voor Craywatch
+# - Uniforme achtergrond: VHA CATC 0 (Bevaarbaar) & 1 (Onbevaarbaar cat 1)
 # - Kaart 1: Totaal overzicht
 # - Kaart 2: Gemeente overzicht
-# - Kaart 3: Focus met Jitter
+# - Kaart 3: Focus op waterlopen (Jitter)
 # ====================================================
 
 # --- 0. Instellingen laden ---
 source("./src/config.R")
 library(ggspatial) 
 
-# Definieer soorten en output map
+# Variabelen
 required_species <- tolower(gbif_species)
 dir_cw_maps <- file.path(dir_data_output, "craywatch_maps")
 if(!dir.exists(dir_cw_maps)) dir.create(dir_cw_maps, recursive = TRUE)
@@ -26,34 +26,27 @@ df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
 
 cw_data <- df_analyse %>% filter(dat.source == "craywatch_data")
 
-# B. Shapefiles (Laden & Voorbereiden)
-message("Shapefiles laden (Vlaanderen & VHA CATC 0/1)...")
+# B. Shapefiles (Uniforme CATC logica)
+message("Shapefiles laden en voorbereiden...")
 
-# 1. Vlaanderen (Masker)
+# Vlaanderen
 vlaanderen <- st_read(file_vlaanderen_grenzen, quiet = TRUE) %>% 
   st_transform(crs_lambert)
 
-# 2. Gemeenten (voor kaart 2)
+# Gemeenten (Clippen naar Vlaanderen)
 gemeenten_clip <- st_read(file_gemeenten, quiet = TRUE) %>%
   st_transform(crs_lambert) %>%
   st_intersection(vlaanderen)
 
-# 3. VHA Waterlopen (De nieuwe standaard achtergrond)
-# We laden de VHA shapefile en filteren direct op CATC 0 en 1
-vha_raw <- st_read(file_vha_catc, quiet = TRUE) %>% 
-  st_transform(crs_lambert)
+# Waterlopen (CATC 0 en 1)
+vha_raw <- st_read(file_vha_catc, quiet = TRUE) %>% st_transform(crs_lambert)
 
-# CATC 0: Bevaarbare waterlopen (De 'hoofdaders')
-cat0_lines <- vha_raw %>% 
-  filter(CATC == 0) %>% 
-  st_intersection(vlaanderen)
+cat0_lines <- vha_raw %>% filter(CATC == 0) %>% st_intersection(vlaanderen)
+cat1_lines <- vha_raw %>% filter(CATC == 1) %>% st_intersection(vlaanderen)
 
-# CATC 1: Onbevaarbare waterlopen cat. 1 (De belangrijke zijlopen)
-cat1_lines <- vha_raw %>% 
-  filter(CATC == 1) %>% 
-  st_intersection(vlaanderen)
-
-message("Shapefiles verwerkt. Gebruik CATC 0 en 1 als basislaag.")
+# Kleuren voor de waterlopen
+col_cat0 <- "#004C99" # Donkerblauw
+col_cat1 <- "#6BA1D3" # Lichtblauw
 
 # --- 2. Data Preparatie (Punten) ---
 
@@ -68,7 +61,7 @@ sf_aanwezig <- cw_long %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>%
   st_transform(crs_lambert)
 
-# B. Afwezigheden
+# B. Afwezigheden (Locaties waar niks gevangen is)
 locs_met_vangst <- unique(sf_aanwezig$locID)
 
 sf_afwezig <- cw_data %>%
@@ -80,15 +73,9 @@ sf_afwezig <- cw_data %>%
 
 # --- 3. Kaart Generatie ---
 
-# Styling definities
+# Styling
 point_size_abs  <- 1.0
 point_size_pres <- 1.0
-
-# Kleuren voor de waterlopen (Uniform over alle kaarten)
-col_cat0 <- "#004C99" # Donkerblauw (Hoofd)
-col_cat1 <- "#6BA1D3" # Lichter blauw (Secundair)
-size_cat0 <- 0.4
-size_cat1 <- 0.3
 
 theme_kaart <- theme_void() +
   theme(
@@ -100,17 +87,13 @@ theme_kaart <- theme_void() +
   )
 
 # --- KAART 1: Totaal Overzicht ---
-message("Genereren Kaart 1: Totaal (Basis: CATC 0+1)...")
+message("Genereren Kaart 1: Totaal...")
 
 p_totaal <- ggplot() +
-  # Achtergrond Vlaanderen
   geom_sf(data = vlaanderen, fill = "#EEEEEE", size = 0.2, colour = "black") +
+  geom_sf(data = cat1_lines, size = 0.3, colour = col_cat1) +
+  geom_sf(data = cat0_lines, size = 0.4, colour = col_cat0) +
   
-  # Waterlopen (De nieuwe standaard)
-  geom_sf(data = cat1_lines, size = size_cat1, colour = col_cat1) +
-  geom_sf(data = cat0_lines, size = size_cat0, colour = col_cat0) +
-  
-  # Punten
   geom_sf(data = sf_afwezig, aes(color = species), size = point_size_abs) +
   geom_sf(data = sf_aanwezig, aes(color = species), size = point_size_pres) +
   
@@ -123,17 +106,14 @@ ggsave(filename = file.path(dir_cw_maps, "kaart_1_totaal_overzicht.png"),
 
 
 # --- KAART 2: Gemeenten ---
-message("Genereren Kaart 2: Gemeenten (Basis: CATC 0+1)...")
+message("Genereren Kaart 2: Gemeenten...")
 
 p_gemeente <- ggplot() +
   geom_sf(data = vlaanderen, fill = "#EEEEEE", size = 0.2, colour = "black") +
   geom_sf(data = gemeenten_clip, size = 0.1, colour = "lightgrey", fill = NA) +
+  geom_sf(data = cat1_lines, size = 0.3, colour = col_cat1) +
+  geom_sf(data = cat0_lines, size = 0.4, colour = col_cat0) +
   
-  # Waterlopen (Dezelfde als kaart 1)
-  geom_sf(data = cat1_lines, size = size_cat1, colour = col_cat1) +
-  geom_sf(data = cat0_lines, size = size_cat0, colour = col_cat0) +
-  
-  # Punten
   geom_sf(data = sf_afwezig, aes(color = species), size = point_size_abs) +
   geom_sf(data = sf_aanwezig, aes(color = species), size = point_size_pres) +
   
@@ -148,8 +128,7 @@ ggsave(filename = file.path(dir_cw_maps, "kaart_2_gemeenten.png"),
 # --- KAART 3: Focus met Jitter ---
 message("Genereren Kaart 3: Focus met Jitter...")
 
-# 1. Filter Data (We plotten hier enkel punten die ook effectief op deze waterlopen liggen)
-#    Dit is optioneel, als je alle punten wilt zien, gebruik sf_afwezig/sf_aanwezig
+# 1. Filter: enkel punten die gekoppeld zijn aan CATC 0 of 1
 sf_afwezig_cat <- sf_afwezig %>% filter(CATC %in% c(0, 1))
 sf_aanwezig_cat <- sf_aanwezig %>% filter(CATC %in% c(0, 1))
 
@@ -165,18 +144,16 @@ punt_ijzer <- st_as_sf(
 
 sf_aanwezig_cat_total <- bind_rows(sf_aanwezig_cat, punt_ijzer)
 
-# 3. Jitter (500m)
+# 3. Jitter (500m om overlap te tonen)
 sf_aanwezig_jitter <- st_jitter(sf_aanwezig_cat_total, amount = 500)
 
 p_catc <- ggplot() +
   geom_sf(data = vlaanderen, fill = "#EEEEEE", size = 0.2, colour = "black") +
   geom_sf(data = gemeenten_clip, size = 0.1, colour = "lightgrey", fill = NA) +
   
-  # Waterlopen (Dezelfde styling)
-  geom_sf(data = cat1_lines, size = size_cat1, colour = col_cat1) +
-  geom_sf(data = cat0_lines, size = size_cat0, colour = col_cat0) +
+  geom_sf(data = cat1_lines, size = 0.3, colour = col_cat1) +
+  geom_sf(data = cat0_lines, size = 0.4, colour = col_cat0) +
   
-  # Punten
   geom_sf(data = sf_afwezig_cat, aes(color = species), size = point_size_abs, alpha = 0.8) +
   geom_sf(data = sf_aanwezig_jitter, aes(color = species), size = point_size_pres) +
   
@@ -187,4 +164,4 @@ p_catc <- ggplot() +
 ggsave(filename = file.path(dir_cw_maps, "kaart_3_cat0_1_focus.png"), 
        plot = p_catc, width = 15, height = 8, units = "cm", dpi = 400)
 
-message("Klaar! Alle kaarten (gebaseerd op CATC 0/1) opgeslagen in: ", dir_cw_maps)
+message("Klaar! Alle kaarten (uniform met CATC 0/1) opgeslagen.")
