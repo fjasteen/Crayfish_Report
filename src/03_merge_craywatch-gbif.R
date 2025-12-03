@@ -73,7 +73,8 @@ gbif_wide <- gbif_clean %>%
     Latitude   = decimalLatitude,
     Longitude  = decimalLongitude,
     trapdays   = NA_real_,
-    found_species = tolower(species) 
+    found_species = tolower(species),
+    coordinateUncertaintyInMeters = coordinateUncertaintyInMeters
   )
 
 # Vul kolommen aan voor elke soort
@@ -83,6 +84,9 @@ for (sp in required_species) {
 }
 gbif_wide <- gbif_wide %>% select(-found_species)
 
+# --- 4b. Add coordinateuncertainty-column for VHAG/WVLC coupling in 04 (Aangepast) ---
+# De waarde (2m) is een aanname voor de hoge precisie van velddata
+craywatch_wide$coordinateUncertaintyInMeters <- 2
 
 # --- 5. Samenvoegen craywatch & GBIF ---
 full_dataset <- bind_rows(craywatch_wide, gbif_wide)
