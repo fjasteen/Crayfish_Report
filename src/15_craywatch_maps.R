@@ -1,9 +1,9 @@
 # ====================================================
 # Scriptnaam: 15_craywatch_maps.R
-# Auteur: Frédérique Steen (Geoptimaliseerd)
+# Auteur: Frédérique Steen 
 # Beschrijving: 
 # - Genereert statische kaarten voor Craywatch
-# - Volgorde correctie: Aanwezigheden liggen BOVENOP afwezigheden
+# - Volgorde correctie: Aanwezigheden liggen bovenop afwezigheden
 # - Kaart 1: Totaal overzicht (craywatch_map)
 # - Kaart 2: Focus op waterlopen CATC 0/1 (catc_map)
 # ====================================================
@@ -28,12 +28,7 @@ message("Shapefiles laden en voorbereiden...")
 vlaanderen <- st_read(file_vlaanderen_grenzen, quiet = TRUE) %>% 
   st_transform(crs_lambert)
 
-# Gemeenten (Nodig voor de achtergrond van de CATC kaart)
-gemeenten_clip <- st_read(file_gemeenten, quiet = TRUE) %>% 
-  st_transform(crs_lambert) %>% 
-  st_intersection(vlaanderen)
-
-# Waterlopen (Voor de specifieke kleuren in de CATC kaart)
+# Waterlopen 
 vha_raw <- st_read(file_vha_catc, quiet = TRUE) %>% st_transform(crs_lambert)
 cat0_lines <- vha_raw %>% filter(CATC == 0) %>% st_intersection(vlaanderen)
 cat1_lines <- vha_raw %>% filter(CATC == 1) %>% st_intersection(vlaanderen)
@@ -58,22 +53,22 @@ sf_afwezig <- cw_data %>% filter(!locID %in% locs_met_vangst) %>%
 point_size_abs  <- 1.0
 point_size_pres <- 1.0 
 
-# --- KAART 1: Overall craywatch map ---
+# --- Overall craywatch map ---
 message("Genereren craywatch_map...")
 
 p_totaal <- get_baseplot() +
-  # EERST afwezigheden (onderlaag)
+  # eerst afwezigheden
   geom_sf(data = sf_afwezig, aes(color = species), size = point_size_abs) +
-  # DAN aanwezigheden (bovenlaag)
+  # dan aanwezigheden
   geom_sf(data = sf_aanwezig, aes(color = species), size = point_size_pres) +
   
   scale_color_manual(values = species_colors, labels = species_labels_dutch) +
   guides(color = guide_legend(override.aes = list(size = 3), ncol = 2))
 
-ggsave(file.path(dir_cw_maps, "craywatch_map.png"), p_totaal, width = 15, height = 8, units = "cm", dpi = 400)
+ggsave(file.path(dir_maps_craywatch, "craywatch_map.png"), p_totaal, width = 15, height = 8, units = "cm", dpi = 400)
 
 
-# --- KAART 2: Map navigatable and cat1 non navigatable watercourses ---
+# --- Map navigatable and cat1 non navigatable watercourses ---
 message("Genereren catc_map...")
 
 # Kleuren specifiek voor deze kaart
@@ -87,13 +82,12 @@ sf_aanwezig_cat <- sf_aanwezig %>% filter(CATC %in% c(0, 1))
 p_catc <- ggplot() +
   # Achtergrond
   geom_sf(data = vlaanderen, fill = "#EEEEEE", size = 0.2, colour = "black") +
-  geom_sf(data = gemeenten_clip, size = 0.1, colour = "lightgrey", fill = NA) +
-  
+
   # Specifieke waterlopen
   geom_sf(data = cat1_lines, size = 0.4, colour = col_cat1_detail) + 
   geom_sf(data = cat0_lines, size = 0.3, colour = col_cat0_detail) + 
   
-  # Punten: EERST afwezigheid, DAN aanwezigheid
+  # Punten: eerst afwezigheid, dan aanwezigheid
   geom_sf(data = sf_afwezig_cat, aes(color = species), size = point_size_abs, alpha = 0.8) +
   geom_sf(data = sf_aanwezig_cat, aes(color = species), size = point_size_pres) +
   
@@ -106,6 +100,6 @@ p_catc <- ggplot() +
         legend.position = "bottom",
         plot.title = element_text(face = "italic", hjust = 0.5))
 
-ggsave(file.path(dir_cw_maps, "catc_map.png"), p_catc, width = 15, height = 8, units = "cm", dpi = 400)
+ggsave(file.path(dir_maps_catc, "catc_map.png"), p_catc, width = 15, height = 8, units = "cm", dpi = 400)
 
 message("Klaar! Kaarten opgeslagen in: ", dir_cw_maps)
