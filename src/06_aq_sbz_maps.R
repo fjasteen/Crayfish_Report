@@ -5,6 +5,7 @@
 # Beschrijving: 
 # - Genereert statische kaarten voor het rapport
 # - Gebruikt SBZ-H en SBP 
+# Gebaseerd op: Concepten uit script [natura2000] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---

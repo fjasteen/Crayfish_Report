@@ -7,6 +7,7 @@
 # - Statistiek: GLMM (watertype)
 # - Model validatie & Post-hoc
 # - Rapportage in Word
+# Gebaseerd op: Concepten uit script [voorkomen_lentisch_lotisch] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---

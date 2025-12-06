@@ -6,6 +6,7 @@
 # - Maakt verspreidingskaarten met CPUE, absences (Craywatch) 
 # en presences (GBIF)
 # - Berekent trends in bezette km-hokken (pre & post Craywatch)
+# Gebaseerd op: Concepten uit script [CPUE] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---

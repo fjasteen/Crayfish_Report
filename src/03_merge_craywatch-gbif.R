@@ -6,7 +6,8 @@
 # - Voegt verwerkte Craywatch en GBIF data samen
 # - Verwijdert dubbele waarnemingen (GBIF records die al in Craywatch zitten)
 # - Koppelt ruimtelijke info (Bekkens, waterlopen, watervlakken)
-# - Exporteert de finale dataset voor analyse 
+# - Exporteert de finale dataset voor analyse
+# # Gebaseerd op: Concepten uit script [04_analyze_validated_data] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---
@@ -34,10 +35,6 @@ if (!file.exists(file_craywatch_validated)) stop("Craywatch bronbestand niet gev
 craywatch_raw <- read_csv(file_craywatch_validated, show_col_types = FALSE)
 
 # --- 2. Shapefiles laden ---
-watervlakken  <- st_read(file_watervlakken, quiet = TRUE)
-target_crs <- st_crs(watervlakken)
-
-vha_catc     <- st_read(file_vha_catc, quiet = TRUE) %>% st_transform(target_crs)
 bekken       <- st_read(file_bekken, quiet = TRUE) %>% st_transform(target_crs)
 
 # --- 3. Data ontdubbelen ---
@@ -92,48 +89,22 @@ craywatch_wide$coordinateUncertaintyInMeters <- 2
 full_dataset <- bind_rows(craywatch_wide, gbif_wide)
 message(paste("Totaal aantal records in merged dataset:", nrow(full_dataset)))
 
-# --- 6. Ruimtelijke koppeling met WVLC, CATC en VHAG---
-
-# transformeer craywatch data
-full_dataset_sf <- st_as_sf(full_dataset, 
-                            coords = c("Longitude", "Latitude"),
-                            crs = 4326, 
-                            remove = FALSE) %>% 
-  st_transform(target_crs)     # Lambert voor berekeningen met afstanden
-
-# nearest neighbour berekeningen
-idx_river <- st_nearest_feature(full_dataset_sf, vha_catc)
-idx_water <- st_nearest_feature(full_dataset_sf, watervlakken)
+# Maak het SF object aan
+full_dataset_sf <- st_as_sf(
+  full_dataset,
+  coords = c("Longitude", "Latitude"), # De kolomnamen voor X en Y
+  crs = 4326,                          # Input is WGS84 (GPS coördinaten)
+  remove = FALSE                       # Behoud de kolommen in de dataframe (handig voor CSV export)
+) %>%
+  st_transform(target_crs)
 
 
 dataset_analyse <- full_dataset_sf %>%
-  mutate(
-    # Haal info op van dichtstbijzijnde features
-    VHAG_cand  = vha_catc$VHAG[idx_river],
-    CATC_cand  = vha_catc$CATC[idx_river],
-    dist_river = st_distance(geometry, vha_catc[idx_river, ], by_element = TRUE),
-    
-    WVLC_cand  = watervlakken$WVLC[idx_water],
-    dist_water = st_distance(geometry, watervlakken[idx_water, ], by_element = TRUE),
-    
-    # Bepaal minimale afstand en zet om naar numeriek (meters)
-    min_dist_unit = pmin(dist_river, dist_water),
-    distances     = as.numeric(min_dist_unit),
-    # Check tegen de drempelwaarde uit config.R (bv. 50m)
-    is_too_far    = distances > max_link_distance_m,
-    
-    # Ken ID's toe (NA als het te ver is)
-    VHAG = if_else(!is_too_far & (dist_river <= dist_water), as.character(VHAG_cand), NA_character_),
-    CATC = if_else(!is_too_far & (dist_river <= dist_water), as.character(CATC_cand), NA_character_),
-    WVLC = if_else(!is_too_far & (dist_water < dist_river), as.character(WVLC_cand), NA_character_)
-  ) %>%
-  
   # Koppel bekkens (punt in polygoon)
   st_join(
     bekken %>% select(BEKNR, BEKNAAM), 
     join = st_intersects, 
-    left = TRUE
-  ) %>%
+    left = TRUE) %>%
   
   # Terug naar dataframe
   st_drop_geometry() %>%
@@ -141,98 +112,13 @@ dataset_analyse <- full_dataset_sf %>%
   # Selecteer de uiteindelijke kolommen
   select(
     dat.source, locID, session_nr, vrijwillID, year, date, Latitude, Longitude, 
-    VHAG, CATC, WVLC, BEKNR, BEKNAAM, distances,
+    BEKNR, BEKNAAM, coordinateUncertaintyInMeters,
     all_of(required_species), starts_with("CPUE_")
   )
-
-
-# --- 7. Checks & rapport ---
-# check afstanden
-summary(dataset_analyse$distances)
-
-# check percentage gekoppeld aan WVLC of CATC 
-n_gekoppeld <- sum(!is.na(dataset_analyse$VHAG) | !is.na(dataset_analyse$WVLC))
-n_totaal    <- nrow(dataset_analyse)
-percentage  <- round(n_gekoppeld / n_totaal * 100, 1)
-
-print(paste("Succesvol gekoppeld:", n_gekoppeld, "van de", n_totaal, paste0("(", percentage, "%)")))
-
 
 # --- 8. Export CSV ---
 if (!dir.exists(dirname(file_analyse_dataset_rapport))) dir.create(dirname(file_analyse_dataset_rapport), recursive = TRUE)
 write.csv(dataset_analyse, file = file_analyse_dataset_rapport, quote = TRUE, row.names = FALSE)
 message(paste("Dataset opgeslagen in rapport map:", file_analyse_dataset_rapport))
-
-# --- 9. Visualisatie: kijk toch even de 50m koppeling na--
-
-# Snelle kaart om de koppeling visueel te checken
-
-map_data_long <- dataset_analyse %>%
-  select(
-    any_of(c("dat.source", "year", "date", 
-             "Latitude", "Longitude", "VHAG", "WVLC", "distances")),
-    any_of(required_species) 
-  ) %>%
-  pivot_longer(
-    cols = any_of(required_species), 
-    names_to = "species_col", 
-    values_to = "pres_val"
-  )
-
-# Groeperen 
-map_data <- map_data_long %>%
-  group_by(dat.source, date, Latitude, Longitude, VHAG, WVLC, distances) %>%
-  mutate(
-    # Is er iéts gevangen op deze plek+datum?
-    any_catch = any(pres_val == 1, na.rm = TRUE)
-  ) %>%
-  ungroup() %>%
-  
-  # Filter: Toon soort als aanwezig (1), OF toon 1 rij "Geen vangst" als niks gevangen is
-  filter(pres_val == 1 | (!any_catch & species_col == required_species[1])) %>%
-  
-  # Zal "Afwezig" zijn bij true absence, en NA indien geen 12 trapdays
-  mutate(
-    species_display = if_else(pres_val == 1, species_col, "Afwezig"),
-    
-    # Bepaal status voor styling (Wel of niet gekoppeld aan water)
-    is_linked = !is.na(VHAG) | !is.na(WVLC)
-  )
-
-# map
-leaflet(data = map_data) %>%
-  addProviderTiles(providers$CartoDB.Positron) %>%
-  
-  addCircleMarkers(
-    lng = ~Longitude,
-    lat = ~Latitude,
-    radius = 5,
-    
-    color = "black", 
-    weight = 1,
-    opacity = 1,
-    
-    fillColor = "black", 
-    fillOpacity = ~ifelse(is_linked, 0.8, 0), # 0.8 = vol: gekoppeld), 0 = leeg: niet gekoppeld
-    
-    popup = ~paste0(
-      "<b>Soort:</b> ", species_display, "<br>",
-      "<b>Datum:</b> ", date, "<br>",
-      "<b>Dataset:</b> ", dat.source, "<br>",
-      "<hr>",
-      "<b>Koppeling:</b> ", ifelse(is_linked, "Ja", "Nee (te ver)"), "<br>",
-      "<b>Afstand:</b> ", round(distances, 1), "m<br>",
-      "<b>VHAG:</b> ", ifelse(is.na(VHAG), "-", VHAG), "<br>",
-      "<b>WVLC:</b> ", ifelse(is.na(WVLC), "-", WVLC)
-    )
-  ) %>%
-  addControl(
-    html = "<div style='background:white;padding:5px;border:1px solid #ccc;'>
-              <b>Legende</b><br>
-              <i style='background:black;width:10px;height:10px;display:inline-block;border-radius:50%;'></i> Gekoppeld<br>
-              <i style='border:1px solid black;width:10px;height:10px;display:inline-block;border-radius:50%;'></i> Niet gekoppeld
-            </div>",
-    position = "bottomright"
-  )
 
 

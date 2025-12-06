@@ -6,7 +6,8 @@
 # - Leest gevalideerde Craywatch data
 # - Checkt op validatiefouten
 # - Aggregeert per sessie (sampling event)
-# - Slaat verwerkte data op voor gebruik in Script 03
+# - Slaat verwerkte data op voor gebruik in Script 03 
+# Gebaseerd op: Concepten uit script [04_analyze_validated_data] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---

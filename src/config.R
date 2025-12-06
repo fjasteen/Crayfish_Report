@@ -76,6 +76,9 @@ file_vlaanderen_grenzen <- file.path(dir_shapefiles, "grenzenvlaanderen.shp")
 file_watervlakken       <- file.path(dir_shapefiles, "watervlakken.shp")
 file_vha_catc           <- file.path(dir_shapefiles, "vhaCattraj.shp")
 file_bekken             <- file.path(dir_shapefiles, "Wsbekken.shp")
+file_overstorten        <- file.path(dir_shapefiles, "P_OS_uitlaat_VHA.shp")
+file_watergang          <- file.path(dir_shapefiles, "Wtz.shp")
+file_waterloopsegmenten <- file.path(dir_shapefiles, "VHA_waterlopen_VHA_waterloopsegment.shp")
 
 # Shapefiles gebruikt in ruimtelijke analyse
 file_n2000_habitats <- file.path(dir_shapefiles, "BwkHab.shp") # natura2000
@@ -169,9 +172,6 @@ cray_min_traps_for_confident_zero <- 12L
 crs_wgs84   <- 4326 #GPS
 crs_lambert <- 31370 # Belgische Lambert 72
 
-# Maximale afstand (m) tot dichtstbijzijnde waterloop/watervlak om VHAG/CATC/WVLC toe te kennen
-max_link_distance_m <- 50 #(Zou 100m moeten zijn omwille van coordinate uncertainty)
-
 # URL voor WFS/API Deelbekken (Watersystemen)
 # OGC API Features URL (Geopunt) - Collectie: WsDeelbek
 url_wfs_deelbekken <- "https://geo.api.vlaanderen.be/Watersystemen/ogc/features/collections/WsDeelbek/items?f=json&limit=5000"
@@ -256,3 +256,46 @@ water_colors <- c(
   "gesloten" = "#2A5959", 
   "open"   = "#2A8C8C"  
 )
+
+## ---------- fysico-chemie ----------
+# Parameters die we willen behouden uit de brede dataset
+# Links = Nieuwe naam (clean), Rechts = Oude naam (in raw data)
+fc_parameter_map <- c(
+  "O2"   = "O2",
+  "BZV5" = "BZV5",
+  "pH"   = "pH",
+  "T"    = "T",
+  "EC20" = "EC 20",
+  "Pt"   = "P t",
+  "Nt"   = "N t",
+  "Cl"   = "Cl-",
+  "ZS"   = "ZS"
+  # Chlorofyl wordt dynamisch gezocht via contains("Clfyl")
+)
+
+# Filter voor het groeiseizoen (maandnummers)
+fc_season_months <- 5:10
+
+## ---------- koppeling riviekreeftendata ----------
+# Maximale afstand (m) tot dichtstbijzijnde waterloop/watervlak om VHAG/CATC/WVLC toe te kennen
+max_link_distance_m <- 15 #(Zet op 15)
+
+
+## ---------- QGIS OMGEVINGSCONFIGURATIE (FIX DLL CONFLICT) ----------
+# 1. Basispad van de QGIS installatie (DOS-formaat)
+qgis_root_path <- "C:/PROGRA~1/QGIS34~1.11" 
+
+# 2. Stel de Omgevingsvariabelen in
+Sys.setenv(OSGEO4W_ROOT = qgis_root_path)
+
+qgis_bin_path <- file.path(qgis_root_path, "bin")
+# Voeg de bin map toe aan de PATH.
+Sys.setenv(PATH = paste(qgis_bin_path, Sys.getenv("PATH"), sep = ";"))
+
+Sys.setenv(QGIS_PREFIX_PATH = file.path(qgis_root_path, "apps", "qgis-ltr"))
+Sys.setenv(PYTHONHOME = file.path(qgis_root_path, "apps", "Python312"))
+
+# (De rest van je config.R, zoals de paden, variabelen en drempels volgt hier...)
+# max_link_distance_m <- 10
+# file_vha_catc <- here("data", "input", "gis", "vha_catc.gpkg")
+## ----------  ----------

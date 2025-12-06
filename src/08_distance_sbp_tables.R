@@ -1,5 +1,6 @@
 # ==============================================================================
 # Scriptnaam:   src/08_sbp_analyse_afstanden_compact.R
+# Auteur: Frédérique Steen
 # Beschrijving: 
 #   1. Analyseert ruimtelijke relaties tussen kreeften en SBP (Vissen + Pgs).
 #   2. Aggregeert gebieden tot één lijst per status-categorie om de tabel compact te houden.

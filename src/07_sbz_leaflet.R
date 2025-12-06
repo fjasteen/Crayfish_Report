@@ -1,5 +1,6 @@
 # ====================================================
 # Scriptnaam: 07_sbz_leaflet.R
+# Auteur: Frédérique Steen
 # Doel: Genereren van de integrale interactieve kaart voor beschermingsstatussen.
 #
 # Beschrijving:

@@ -6,6 +6,7 @@
 # - Volgorde correctie: Aanwezigheden liggen bovenop afwezigheden
 # - Kaart 1: Totaal overzicht (craywatch_map)
 # - Kaart 2: Focus op waterlopen CATC 0/1 (catc_map)
+# Gebaseerd op: Concepten uit script [create_craywatch_maps] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---

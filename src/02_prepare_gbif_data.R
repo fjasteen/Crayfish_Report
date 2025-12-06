@@ -6,6 +6,7 @@
 # - Downloadt recente GBIF data (automatisch indien niet aanwezig)
 # - Filtert op taxon, kwaliteit en locatie (ruimtelijke grens Vlaanderen)
 # - Slaat verwerkte data op voor gebruik in Script 03
+# # Gebaseerd op: Concepten uit script [04_analyze_validated_data] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---

@@ -6,6 +6,7 @@
 # - Filtert soorten zonder historie of expansie
 # - Sorteert op totaal aantal (meeste links)
 # - FIX: Robuuste arcering
+# Gebaseerd op: Concepten uit script [stats] van M. Vermeylen
 # ====================================================
 
 source("./src/config.R")

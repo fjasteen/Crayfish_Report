@@ -1,9 +1,11 @@
 # ====================================================
-# Scriptnaam: src/05_load_aq_sbz.R
+# Scriptnaam: 05_load_aq_sbz.R
+# Auteur: Frédérique Steen
 # Beschrijving: 
 # - Laadt alle ruimtelijke beschermingslagen (N2000, SBP, HBTRL)
 # - Laadt en verwerkt de kreeftendata (CF_presence)
 # - Transformeert alles naar CRS Lambert (31370)
+# Gebaseerd op: Concepten uit script [natura2000] van M. Vermeylen
 # ====================================================
 
 # We gaan ervan uit dat config.R al geladen is door het moederscript

@@ -8,7 +8,7 @@
 # - Plot soorten per watertype 
 # - Plot vangstsucces per watertype  
 # - Statistiek: GLMM
-
+# Gebaseerd op: Concepten uit script [voorkomen_lentisch_lotisch] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---
@@ -22,9 +22,20 @@ library(car) # Voor Type III Anova
 # --- 1. Data Inlezen ---
 if (!file.exists(file_analyse_dataset_rapport)) stop("Run eerst script 03!")
 
-df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE) %>%
-  # We hebben een ruimtelijke koppeling nodig om het watertype te bepalen
-  filter(!is.na(VHAG) | !is.na(WVLC))
+df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
+
+# 2. Check op Ruimtelijke Koppeling (Script 04)
+if (!"valid_link" %in% names(df_analyse)) {
+  stop(
+    "\n\n======================================================================",
+    "\nFOUT: De dataset mist de ruimtelijke koppeling (VHAG/WVLC).",
+    "\n\nDe kolommen 'valid_link' en 'link_method' ontbreken.",
+    "\n-> Voer eerst script '04_spatial_link_core.R' uit om dit toe te voegen.",
+    "\n======================================================================\n"
+  )
+} else {
+  message("Ruimtelijke koppeling geverifieerd. Analyse start...")
+}
 
 # --- 2. Data voorbereiden ---
 
