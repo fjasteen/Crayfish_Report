@@ -6,7 +6,7 @@
 # Beschrijving: 
 # - Laadt de gevalideerde onderzoekslocaties
 # - Voert complexe hydrologische analyse uit (VHAG2 identificatie via QGIS)
-# - Koppelt VHAG- en WVLC-data met Fysicochemische (FC) metingen
+# - Koppelt kreeftenlocaties met Fysicochemische (FC) meetpunten
 # - Past een driejarig lag-model toe en aggregeert tot zomermediaan
 # ====================================================
 
@@ -28,7 +28,7 @@ waterloop <- read_sf(file_vha_catc) %>%
 if (!file.exists(file_analyse_dataset_rapport)) stop("Output van script 04 niet gevonden.")
 data <- read_csv(file_analyse_dataset_rapport) %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, remove = FALSE) %>%
-  st_transform(31370)
+  st_transform(31370) 
 
 # C. Fysicochemische Data (Output van Script 18)
 # Bevat reeds de zomermedianen (5:10) per sample_point en jaar
@@ -166,15 +166,14 @@ if (file.exists(output_file)) {
   save(data, file = output_file)
 }
 
-# Opslaan tussenresultaat
-save(data, file = here("data", "intermediate", "analysis_dataset_vhag2.Rdata"))
 
 # --- 4. Temporele Replicatie (Time Lag) ---
 # Creëer records voor het huidige jaar en de twee voorgaande jaren (t, t-1, t-2)
 # voor koppeling met FC-data over een langere periode.
 
 data <- data%>%
-  mutate(yearGroup = year)
+  mutate(yearGroup = year,
+         vangstID = row_number())
 
 data <- data%>%
   bind_rows(data%>%
@@ -266,7 +265,7 @@ data_fc_vhag <- data_fc_vhag_linked %>%
 # Combineer WVLC en VHAG resultaten
 data_fc_cray_combined <- bind_rows(data_fc_wvlc, data_fc_vhag) %>%
   st_drop_geometry() %>%
-  select(-VHAG2)
+  select(-VHAG2) 
 
 cray_fc_linked <- file.path(dir_data_output, "cray_fc_linked.txt")
 
