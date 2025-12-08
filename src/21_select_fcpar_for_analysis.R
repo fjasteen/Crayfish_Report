@@ -124,51 +124,29 @@ df_compare <- inner_join(df_3jaar, df_1jaar, by = c("vangstID", "Parameter"))
 
 # Samenvoegen
 # --- ROBUUSTE TOST FUNCTIE (Workaround voor TOSTER bug) ---
+# --- AANGEPASTE FUNCTIE: Wilcoxon TOST (Conform M&M en Collega) ---
 perform_tost <- function(param_name, data, bounds_df) {
   
-  # 1. Filter data voor deze stof
+  # 1. Filter data en haal grens op
   subset_data <- data %>% filter(Parameter == param_name)
-  
-  # 2. Haal de grens op
   delta <- bounds_df$bound_delta[bounds_df$Parameter == param_name]
   
-  # 3. Bereken direct de VERSCHILLEN (3 jaar - 1 jaar)
-  # Dit is de workaround: we doen het 'paren' zelf.
+  # Bereken verschillen (voor validatie en N)
   diffs <- subset_data$Val_3yr - subset_data$Val_1yr
-  diffs <- na.omit(diffs) # Verwijder lege waarden
+  diffs <- na.omit(diffs)
   
-  # 4. Validatie checks
-  # Hebben we genoeg data (minimaal 3 paren)?
-  if(length(diffs) < 3 || is.na(delta) || length(delta) == 0) {
-    return(NULL)
-  }
+  # 2. Checks: Hebben we genoeg data en een grens?
+  if(length(diffs) < 3 || is.na(delta) || length(delta) == 0) return(NULL)
   
-  # Check of er variatie is (als alle verschillen exact 0 zijn, crasht de t-test)
-  if(sd(diffs) == 0) {
-    # Als het verschil constant 0 is, is het per definitie equivalent, 
-    # maar de t-test formule kan niet delen door SD=0.
-    # We vullen het handmatig in als "Equivalent".
-    return(data.frame(
-      Parameter = param_name,
-      N = length(diffs),
-      Mean_Diff = 0,
-      Bound_Delta = delta,
-      TOST_p1 = 0, TOST_p2 = 0, Max_P_TOST = 0,
-      Resultaat = "Equivalent (SD=0)",
-      stringsAsFactors = FALSE
-    ))
-  }
-  
-  # 5. Voer TOST uit op de VERSCHILLEN (One-sample t-test tegen 0)
+  # 3. Voer Wilcoxon TOST uit (Non-parametrisch, robuust tegen uitschieters)
   result <- tryCatch({
     
-    TOSTER::t_TOST(
-      x = diffs,               # We geven de verschillen door
-      mu = 0,                  # We testen of het verschil afwijkt van 0
-      low_eqbound = -delta,
-      high_eqbound = delta,
-      # BELANGRIJK: 'paired' en 'var.equal' hoeven hier niet meer, 
-      # want we doen nu een one-sample test. Dit omzeilt de bug.
+    TOSTER::wilcox_TOST(
+      x = subset_data$Val_3yr,
+      y = subset_data$Val_1yr,
+      paired = TRUE,           # Het gaat om dezelfde kreeften
+      low_eqbound = -delta,    # Ondergrens
+      high_eqbound = delta,    # Bovengrens
       plot = FALSE
     )
     
@@ -179,17 +157,22 @@ perform_tost <- function(param_name, data, bounds_df) {
   
   if(is.null(result)) return(NULL)
   
-  # 6. Resultaten extraheren
+  # 4. Resultaten extraheren
+  # Wilcoxon werkt met rangordes, dus we rapporteren de MEDIAAN van het verschil, niet het gemiddelde.
+  
+  # TOSTER output structuur voor wilcox_TOST:
+  # Rij 2 = TOST Lower, Rij 3 = TOST Upper (meestal, we pakken veilig de max p-waarde)
+  max_p <- max(result$TOST$p.value[2:3], na.rm = TRUE) 
+  
   return(data.frame(
     Parameter = param_name,
     N = length(diffs),
-    Mean_Diff = mean(diffs),
+    # We tonen de mediaan van het verschil (Dit zal veel lager zijn dan jouw 544!)
+    Median_Diff = median(diffs), 
     Bound_Delta = delta,
-    # P-waardes ophalen (TOSTER geeft bij one-sample soms andere output structuur, dit is veilig:)
-    TOST_p1 = result$TOST$p.value[1], 
-    TOST_p2 = result$TOST$p.value[2], 
-    Max_P_TOST = max(result$TOST$p.value[1:2]),
-    Resultaat = ifelse(max(result$TOST$p.value[1:2]) < 0.05, "Equivalent", "Niet Equivalent"),
+    Max_P_TOST = max_p,
+    # Conclusie: Als P < 0.05, dan is het equivalent
+    Resultaat = ifelse(max_p < 0.05, "Equivalent", "Niet Equivalent"),
     stringsAsFactors = FALSE
   ))
 }
