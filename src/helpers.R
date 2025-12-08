@@ -1,3 +1,4 @@
+################################################################################
 #' Bepaalt de aangrenzende VHAG's (VHAG2) voor een subset van punten.
 #'
 #' Let op: Deze functie is ontworpen om in een batch-lus te worden aangeroepen.
@@ -7,6 +8,8 @@
 #' @param waterloop Het originele waterloop sf object voor de join.
 #'
 #' @return De ingevoerde data_batch met de toegevoegde VHAG2 kolom.
+#' ################################################################################
+
 calculate_vhag2_batch <- function(data_batch, polyline, waterloop) {
   
   # 1. Bepaal welke punten de complexe logica nodig hebben (Projectie)
@@ -95,3 +98,130 @@ calculate_vhag2_batch <- function(data_batch, polyline, waterloop) {
   
   return(data_batch_output)
 }
+
+################################################################################
+#' Match punten aan waterlopen en watervlakken
+#' 
+#' @param points_sf SF object met de te koppelen punten
+#' @param rivers SF object (Lijnen/Segmenten) met VHAG en VHAS kolommen
+#' @param lakes SF object (Polygonen) met WVLC kolom
+#' @param watergang SF object (GRB Polygonen) voor breedtebepaling
+#' @param buffer_m Numeriek, de maximale basisafstand (uit config)
+#' 
+#' @return SF object met toegevoegde kolommen: VHAG, VHAS, WVLC, distance_linked, link_status
+################################################################################
+
+match_points_to_water <- function(points_sf, rivers, lakes, watergang, buffer_m) {
+  
+  message("--- Start centrale match-functie ---")
+  
+  # 1. Nearest feature bepalen voor rivieren en meren
+  message("   > Berekenen dichtstbijzijnde features...")
+  idx_riv <- st_nearest_feature(points_sf, rivers)
+  idx_wat <- st_nearest_feature(points_sf, lakes)
+  
+  # 2. Afstanden berekenen
+  # Let op: by_element = TRUE zorgt voor paarsgewijze afstand (snel)
+  dist_riv <- st_distance(points_sf, rivers[idx_riv, ], by_element = TRUE)
+  dist_wat <- st_distance(points_sf, lakes[idx_wat, ], by_element = TRUE)
+  
+  # 3. Data voorbereiden met kandidaten
+  # We zetten units om naar numeriek om warnings te vermijden
+  data_linked <- points_sf %>%
+    mutate(
+      # Rivier kandidaten
+      VHAG_cand = rivers$VHAG[idx_riv],
+      VHAS_cand = rivers$VHAS[idx_riv],
+      dist_riv_m = as.numeric(dist_riv),
+      
+      # Meer kandidaten
+      WVLC_cand = lakes$WVLC[idx_wat],
+      dist_wat_m = as.numeric(dist_wat),
+      
+      # Bepaal winnaar (wie is dichterbij?)
+      type_water = if_else(dist_riv_m <= dist_wat_m, "open", "gesloten"),
+      dist_actual = pmin(dist_riv_m, dist_wat_m)
+    )
+  
+  # 4. Validatie Logica
+  message("   > Validatie en GRB-breedte check uitvoeren...")
+  
+  data_validated <- data_linked %>%
+    mutate(
+      VHAG = NA_character_,
+      VHAS = NA_character_,
+      WVLC = NA_character_,
+      link_status = "niet gekoppeld",
+      distance_linked = NA_real_
+    )
+  
+  # A. Binnen harde buffer (Standaard validatie)
+  # --------------------------------------------
+  # Alles binnen 'buffer_m' is automatisch goed.
+  mask_buffer <- data_validated$dist_actual <= buffer_m
+  
+  data_validated$link_status[mask_buffer] <- "buffer"
+  data_validated$distance_linked[mask_buffer] <- data_validated$dist_actual[mask_buffer]
+  
+  # Vul ID's in op basis van type
+  is_open <- data_validated$type_water == "open"
+  
+  # Open water binnen buffer
+  data_validated$VHAG[mask_buffer & is_open] <- as.character(data_validated$VHAG_cand[mask_buffer & is_open])
+  data_validated$VHAS[mask_buffer & is_open] <- as.character(data_validated$VHAS_cand[mask_buffer & is_open])
+  
+  # Gesloten water binnen buffer
+  data_validated$WVLC[mask_buffer & !is_open] <- as.character(data_validated$WVLC_cand[mask_buffer & !is_open])
+  
+  
+  # B. GRB Breedte Check (Alleen voor Open Water buiten buffer)
+  # --------------------------------------------
+  # Selecteer de twijfelgevallen: Buiten buffer, maar wel 'open' water
+  mask_check_grb <- (!mask_buffer) & (data_validated$type_water == "open")
+  
+  if (any(mask_check_grb)) {
+    
+    # We isoleren de twijfelgevallen voor de zware ruimtelijke join
+    candidates_grb <- data_validated[mask_check_grb, ]
+    
+    # Spatial join naar GRB watergang (dichtstbijzijnde)
+    # We doen dit apart om performance te sparen
+    candidates_grb <- st_join(candidates_grb, watergang, join = st_nearest_feature, suffix = c("", "_wg"))
+    
+    # Validatie logica
+    # 1. De GRB polygoon moet matchen met de VHAG van de aslijn
+    # 2. De afstand moet binnen (breedte/2 + buffer) vallen
+    
+    candidates_grb <- candidates_grb %>%
+      mutate(
+        breedteschatting = OPPERVL / LENGTE,
+        max_allowed_dist = (breedteschatting / 2) + buffer_m,
+        
+        # Check match (VHAG moet bestaan in GRB dataset en overeenkomen)
+        vhag_match = !is.na(VHAG) & (as.character(VHAG_cand) == as.character(VHAG)),
+        
+        is_valid_grb = vhag_match & (dist_actual <= max_allowed_dist)
+      )
+    
+    # Terugzetten in de hoofd-dataset
+    # We gebruiken row-indices of ID matching indien beschikbaar. 
+    # Hier simpelweg via logische vectoren updaten als de volgorde klopt (wat zo is bij filtering).
+    
+    valid_indices <- which(mask_check_grb)[candidates_grb$is_valid_grb]
+    
+    if (length(valid_indices) > 0) {
+      data_validated$link_status[valid_indices] <- "GRB_corrected"
+      data_validated$distance_linked[valid_indices] <- data_validated$dist_actual[valid_indices]
+      data_validated$VHAG[valid_indices] <- as.character(data_validated$VHAG_cand[valid_indices])
+      data_validated$VHAS[valid_indices] <- as.character(data_validated$VHAS_cand[valid_indices])
+    }
+  }
+  
+  # 5. Opkuis
+  message("   > Afronden...")
+  data_final <- data_validated %>%
+    select(-VHAG_cand, -VHAS_cand, -WVLC_cand, -dist_riv_m, -dist_wat_m, -type_water, -dist_actual)
+  
+  return(data_final)
+}
+
