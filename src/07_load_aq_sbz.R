@@ -1,5 +1,5 @@
 # ====================================================
-# Scriptnaam: 05_load_aq_sbz.R
+# Scriptnaam: 07_load_aq_sbz.R
 # Auteur: Frédérique Steen
 # Beschrijving: 
 # - Laadt alle ruimtelijke beschermingslagen (N2000, SBP, HBTRL)

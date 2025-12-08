@@ -1,5 +1,5 @@
 # ==============================================================================
-# Scriptnaam:   src/08_sbp_analyse_afstanden_compact.R
+# Scriptnaam:   src/09_sbp_analyse_afstanden_compact.R
 # Auteur: Frédérique Steen
 # Beschrijving: 
 #   1. Analyseert ruimtelijke relaties tussen kreeften en SBP (Vissen + Pgs).

@@ -1,5 +1,5 @@
 # ====================================================
-# Scriptnaam: 14_citizenscience_tables.R
+# Scriptnaam: 15_citizenscience_tables.R
 # Beschrijving: 
 # - Metadata analyse van burgerwetenschapsdata
 # - Focus op bruikbare sessies

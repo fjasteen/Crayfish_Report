@@ -1,5 +1,5 @@
 # ====================================================
-# Scriptnaam: 11_watertype_glmm.R
+# Scriptnaam: 14_watertype_glmm.R
 # Auteur: Frédérique Steen
 # Datum: 01-12-2025
 # Beschrijving: 

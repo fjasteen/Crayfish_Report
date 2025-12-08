@@ -1,5 +1,5 @@
 # ==============================================================================
-# Scriptnaam:   src/08_sbz_analyse_afstanden.R
+# Scriptnaam:   10_sbz_analyse_afstanden.R
 # Auteur: Frédérique Steen
 # Beschrijving: 
 #   1. Analyseert ruimtelijke relaties tussen kreeftenpopulaties en SBZ-H gebieden.

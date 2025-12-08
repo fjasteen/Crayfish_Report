@@ -1,5 +1,5 @@
 # ====================================================
-# Scriptnaam: 19_Spatial_Context_Refined.R
+# Scriptnaam: 20_link_fc_craywatch.R
 # Auteur: Stien Mertens
 # Refactored door: Frédérique Steen
 # Datum laatste wijziging: 05-12-2025
@@ -28,11 +28,10 @@ waterloop <- read_sf(file_vha_catc) %>%
 if (!file.exists(file_analyse_dataset_rapport)) stop("Output van script 04 niet gevonden.")
 data <- read_csv(file_analyse_dataset_rapport) %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, remove = FALSE) %>%
-  st_transform(31370) %>%
-  mutate("vangstID" = row_number())
+  st_transform(31370)
 
 # C. Fysicochemische Data (Output van Script 18)
-# Bevat reeds de zomermedianen per sample_point en jaar
+# Bevat reeds de zomermedianen (5:10) per sample_point en jaar
 file_fc_agg <- file.path(dir_data_intermediate, "fysicochemie", "fc_data_aggregated.Rdata")
 if (!file.exists(file_fc_agg)) stop("Output van script 18 (fc_data_aggregated) niet gevonden.")
 load(file_fc_agg)

@@ -1,5 +1,5 @@
 # ====================================================
-# Scriptnaam: 15_craywatch_maps.R
+# Scriptnaam: 16_craywatch_maps.R
 # Auteur: Frédérique Steen 
 # Beschrijving: 
 # - Genereert statische kaarten voor Craywatch

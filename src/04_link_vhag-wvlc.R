@@ -130,10 +130,12 @@ ggsave(file.path(dir_data_intermediate, "check_spatial_link_distances.png"), p, 
 
 # Opslaan
 # Indien output paden niet in config stonden, definieer ze hier even tijdelijk:
-if (!dir.exists(dirname(file_analyse_dataset_rapport))) dir.create(dirname(file_analyse_dataset_rapport), recursive = TRUE)
-write.csv(dataset_final, file = file_analyse_dataset_rapport, quote = TRUE, row.names = FALSE)
-message(paste("Dataset opgeslagen in rapport map:", file_analyse_dataset_rapport))
+write.csv(dataset_final %>% st_drop_geometry(), 
+          file = file_analyse_dataset_rapport, 
+          quote = TRUE, 
+          row.names = FALSE)
 
+message(paste("Dataset opgeslagen in rapport map:", file_analyse_dataset_rapport))
 
 #Visuele check
 library(mapview)
