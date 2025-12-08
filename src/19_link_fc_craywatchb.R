@@ -18,23 +18,28 @@ library(dplyr)
 library(here) # Toegevoegd voor consistentie met gebruik verderop
 
 # --- 1. Data Inladen ---
-# Opmerking: Deze objecten moeten in het geheugen geladen zijn via voorgaande stappen.
-# 'file_vha_catc': Bronbestand voor de waterlopen
-# 'file_analyse_dataset_rapport': Output van stap 04 (gekoppelde locaties)
-
-# Inlezen waterloopnetwerk en transformeren naar Lambert72
+# Waterlopen 
+# Nodig voor de QGIS-analyse van aangrenzende segmenten
 waterloop <- read_sf(file_vha_catc) %>%
   st_transform(31370)
 
-# Masterdataset inlezen en omzetten naar SF-object (Lambert72)
+# Kreeften dataset (output van Script 04)
+# Bevat locID, datum en gekoppelde VHAG/WVLC uit de vorige stap
+if (!file.exists(file_analyse_dataset_rapport)) stop("Output van script 04 niet gevonden.")
 data <- read_csv(file_analyse_dataset_rapport) %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326, remove = FALSE) %>%
   st_transform(31370)
 
-# --- 2. Ruimtelijke Voorbewerking (QGIS Process) ---
-# Doel: Creëren van een topologisch correct waterloopnetwerk.
-# Vereist: 'qgisprocess' package en een geconfigureerde QGIS-installatie.
+# C. Fysicochemische Data (Output van Script 18)
+# Bevat reeds de zomermedianen per sample_point en jaar
+file_fc_agg <- file.path(dir_data_intermediate, "fysicochemie", "fc_data_aggregated.Rdata")
+if (!file.exists(file_fc_agg)) stop("Output van script 18 (fc_data_aggregated) niet gevonden.")
+load(file_fc_agg)
 
+# --- 2. Ruimtelijke Voorbewerking (QGIS Process) ---
+# Doel: Creëren van een topologisch correct waterloopnetwerk
+# Dit snapt lijnen aan elkaar en voegt segmenten met dezelfde VHAG samen.
+message("QGIS processing starten (Snap & Dissolve)...")
 # Stap 1: Snap polylines om kleine gaten te dichten (threshold 0.01)
 waterloop_merge <- qgis_run_algorithm(
   "grass:v.clean",
@@ -65,18 +70,12 @@ dist_end_point <- function(x, data_point = data, polyline = waterloop_merge){
   if(!is.na(data_point$VHAG[x])){
     
     # Subsets maken voor het specifieke punt en bijbehorende waterloop
-    data_sub <- data_point%>%
-      dplyr::filter(row_number() == x)
-    
-    waterloop_sub <- polyline%>%
-      dplyr::filter(VHAG == data_sub$VHAG)
+    data_sub <- data_point %>% dplyr::filter(row_number() == x)
+    waterloop_sub <- polyline %>% dplyr::filter(VHAG == data_sub$VHAG)
     
     # Omzetten naar sfc formaat voor geometrische operaties
-    data_sub_sfc <- data_sub%>%
-      st_as_sfc()
-    
-    waterloop_sub_sfc <- waterloop_sub%>%
-      st_as_sfc()
+    data_sub_sfc <- data_sub %>% st_as_sfc()
+    waterloop_sub_sfc <- waterloop_sub %>% st_as_sfc()
     
     # Bereken projectie op de lijn en totale lijnlengte
     measure_data <- st_line_project(waterloop_sub_sfc, data_sub_sfc)
@@ -145,8 +144,27 @@ dist_end_point <- function(x, data_point = data, polyline = waterloop_merge){
 }
 
 # Toepassen van de functie op de dataset (creëert kolom VHAG2)
-data <- data %>%
-  mutate(VHAG2 = map(1:nrow(.), dist_end_point))
+# Definieer het pad naar het bestand (zodat je het maar 1x hoeft te typen)
+output_file <- here("data", "intermediate", "analysis_dataset_vhag2.Rdata")
+
+# Check of het bestand al bestaat
+if (file.exists(output_file)) {
+  
+  # OPTIE A: Het bestand bestaat -> Laad het in
+  message("Bestaand bestand gevonden. Data wordt ingeladen...")
+  load(output_file)
+  
+} else {
+  
+  # OPTIE B: Het bestand bestaat niet -> Voer de berekening uit
+  message("Bestand niet gevonden. Berekening wordt gestart...")
+  
+  data <- data %>%
+    mutate(VHAG2 = map(1:nrow(.), dist_end_point))
+  
+  # Sla het resultaat op voor de volgende keer
+  save(data, file = output_file)
+}
 
 # Opslaan tussenresultaat
 save(data, file = here("data", "intermediate", "analysis_dataset_vhag2.Rdata"))
@@ -247,10 +265,13 @@ data_fc_vhag <- data_fc_vhag_linked %>%
 # --- 8. Samenvoegen en Export Ruwe Data ---
 # Combineer WVLC en VHAG resultaten
 data_fc_cray_combined <- bind_rows(data_fc_wvlc, data_fc_vhag) %>%
-  st_drop_geometry()
+  st_drop_geometry() %>%
+  select(-VHAG2)
+
+cray_fc_linked <- file.path(dir_data_output, "cray_fc_linked.txt")
 
 # Export dataset
 write.table(data_fc_cray_combined, 
-            file = here("data", "output", "data_fc_cray_linked.txt"), 
+            file = cray_fc_linked, 
             sep = "\t", row.names = FALSE)
 

@@ -35,7 +35,7 @@ if (!file.exists(file_craywatch_validated)) stop("Craywatch bronbestand niet gev
 craywatch_raw <- read_csv(file_craywatch_validated, show_col_types = FALSE)
 
 # --- 2. Shapefiles laden ---
-bekken       <- st_read(file_bekken, quiet = TRUE) %>% st_transform(target_crs)
+bekken       <- st_read(file_bekken, quiet = TRUE) %>% st_transform(crs_lambert)
 
 # --- 3. Data ontdubbelen ---
 # Verwijder GBIF records afkomstig van 'Natuurpunt:Waarnemingen' 
@@ -96,7 +96,7 @@ full_dataset_sf <- st_as_sf(
   crs = 4326,                          # Input is WGS84 (GPS coördinaten)
   remove = FALSE                       # Behoud de kolommen in de dataframe (handig voor CSV export)
 ) %>%
-  st_transform(target_crs)
+  st_transform(crs_lambert)
 
 
 dataset_analyse <- full_dataset_sf %>%

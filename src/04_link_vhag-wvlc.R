@@ -134,3 +134,46 @@ if (!dir.exists(dirname(file_analyse_dataset_rapport))) dir.create(dirname(file_
 write.csv(dataset_final, file = file_analyse_dataset_rapport, quote = TRUE, row.names = FALSE)
 message(paste("Dataset opgeslagen in rapport map:", file_analyse_dataset_rapport))
 
+
+#Visuele check
+library(mapview)
+library(tidyverse)
+library(sf)
+
+map_sf <- dataset_final %>%
+  # 1. Soorten samenvoegen tot één kolom voor weergave
+  pivot_longer(
+    cols = c("procambarus clarkii", "procambarus virginalis", "procambarus acutus", 
+             "faxonius limosus", "pacifastacus leniusculus", "faxonius virilis", 
+             "pontastacus leptodactylus"),
+    names_to = "Soort",
+    values_to = "Aanwezig"
+  ) %>%
+  filter(Aanwezig == 1) %>%
+  
+  mutate(
+    # 2. Status bepalen
+    Status = case_when(
+      !is.na(VHAG) ~ "VHAG (Waterloop)",
+      !is.na(WVLC) ~ "WVLC (Watervlak)",
+      TRUE ~ "Niet gekoppeld"
+    ),
+    # 3. Afstand afronden voor nette popup (1 decimaal)
+    Afstand_m = round(distances, 1)
+  ) %>%
+  
+  # 4. Omzetten naar SF
+  st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) %>%
+  
+  # 5. SELECTEER HIER de kolommen voor de popup
+  # De naam die je hier kiest, wordt de label in de popup
+  select(Soort, date, Status, VHAG, WVLC, Afstand_m)
+
+# 6. Kaart genereren
+mapview(
+  map_sf, 
+  zcol = "Status", 
+  col.regions = c("gray", "red", "orange"), 
+  layer.name = "Kreeften",
+  legend = TRUE
+)
