@@ -278,7 +278,7 @@ fc_season_months <- 5:10
 
 ## ---------- koppeling riviekreeftendata ----------
 # Maximale afstand (m) tot dichtstbijzijnde waterloop/watervlak om VHAG/CATC/WVLC toe te kennen
-max_link_distance_m <- 15 #(Zet op 15)
+max_link_distance_m <- 10 #(Zet op 15)
 
 
 ## ---------- QGIS OMGEVINGSCONFIGURATIE (FIX DLL CONFLICT) ----------
@@ -295,7 +295,4 @@ Sys.setenv(PATH = paste(qgis_bin_path, Sys.getenv("PATH"), sep = ";"))
 Sys.setenv(QGIS_PREFIX_PATH = file.path(qgis_root_path, "apps", "qgis-ltr"))
 Sys.setenv(PYTHONHOME = file.path(qgis_root_path, "apps", "Python312"))
 
-# (De rest van je config.R, zoals de paden, variabelen en drempels volgt hier...)
-# max_link_distance_m <- 10
-# file_vha_catc <- here("data", "input", "gis", "vha_catc.gpkg")
 ## ----------  ----------

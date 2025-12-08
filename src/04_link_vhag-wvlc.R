@@ -101,7 +101,7 @@ map_sf <- dataset_final %>%
       TRUE ~ "Niet gekoppeld"
     ),
     # 3. Afstand afronden voor nette popup (1 decimaal)
-    Afstand_m = round(distance_linked, 1)
+    Afstand_m = round(distance_link, 1)
   ) %>%
   
   # 4. Omzetten naar SF
