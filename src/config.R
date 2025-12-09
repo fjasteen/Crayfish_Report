@@ -92,14 +92,17 @@ file_gemeenten      <- file.path(dir_shapefiles, "gemeenten.shp") # gemeentegren
 file_urban_map <- file.path(dir_shapefiles, "verstedelijking.gpkg")
 
 
-## ---------- 4. Bestanden: Intermediate (RDS) ----------
+## ---------- Bestanden: Intermediate (RDS) ----------
 file_inter_craywatch_clean <- file.path(dir_data_intermediate, "craywatch_clean.rds")
 file_inter_gbif_processed  <- file.path(dir_data_intermediate, "gbif_processed.rds")
+file_inter_vhag2           <- file.path(dir_data_intermediate, "analysis_dataset_vhag2.Rdata")
+file_fc_locations_data     <- file.path(dir_data_intermediate, "fysicochemie", "fc_locations_data.Rdata")
+file_fc_locations_validated<- file.path(dir_data_intermediate, "fysicochemie", "fc_locations_validated.Rdata")
 
 # GBIF raw output 
 file_gbif_occurrences      <- file.path(dir_gbif_input, "gbif_occ_CF.csv")
 
-## ---------- 5. Bestanden: Output ----------
+## ---------- Bestanden: Output ----------
 file_analyse_dataset_rapport   <- file.path(dir_data_output, "analyse_dataset.csv")
 file_analyse_dataset_craywatch <- file.path(dir_craywatch_output, "analyse_dataset.csv")
 
@@ -117,7 +120,7 @@ file_plot_water_distributie  <- file.path(dir_watertype_output, "plot_water_dist
 file_plot_water_community    <- file.path(dir_watertype_output, "plot_water_community.png")
 file_plot_water_vangstsucces <- file.path(dir_watertype_output, "plot_water_vangstsucces.png")
 
-## ---------- 6. GBIF download instellingen ----------
+## ---------- GBIF download instellingen ----------
 gbif_species <- c(
   "Procambarus clarkii",
   "Procambarus virginalis",
@@ -269,7 +272,10 @@ fc_parameter_map <- c(
   "Pt"   = "P t",
   "Nt"   = "N t",
   "Cl"   = "Cl-",
-  "ZS"   = "ZS"
+  "ZS"   = "ZS",
+  "Secchi" = "Secchi",    # Als naam gelijk blijft
+  "Ca"     = "Ca o",      # Hernoem 'Ca o' naar 'Ca'
+  "oPO4"   = "oPO4"
   # Chlorofyl wordt dynamisch gezocht via contains("Clfyl")
 )
 
@@ -281,7 +287,7 @@ fc_season_months <- 5:10
 max_link_distance_m <- 10 #(Zet op 15)
 
 
-## ---------- QGIS OMGEVINGSCONFIGURATIE (FIX DLL CONFLICT) ----------
+## ---------- Qgis omgevingsconfiguratie ----------
 # 1. Basispad van de QGIS installatie (DOS-formaat)
 qgis_root_path <- "C:/PROGRA~1/QGIS34~1.11" 
 
@@ -295,4 +301,4 @@ Sys.setenv(PATH = paste(qgis_bin_path, Sys.getenv("PATH"), sep = ";"))
 Sys.setenv(QGIS_PREFIX_PATH = file.path(qgis_root_path, "apps", "qgis-ltr"))
 Sys.setenv(PYTHONHOME = file.path(qgis_root_path, "apps", "Python312"))
 
-## ----------  ----------
+## --------------------
