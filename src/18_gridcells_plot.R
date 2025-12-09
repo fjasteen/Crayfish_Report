@@ -42,9 +42,7 @@ occ_grid$date <- as.Date(occ_grid$date)
 start_pre     <- as.Date("2010-01-01") 
 end_pre       <- as.Date("2024-05-31") 
 
-# ==============================================================================
-# 3. BEREKENING 
-# ==============================================================================
+# --- 3. Berekening ---
 
 # Stap A: Aggregatie
 grid_summary <- occ_grid %>%
@@ -104,9 +102,7 @@ order_sp <- df_plot_ready %>%
 
 df_plot_ready$dutch_name <- factor(df_plot_ready$dutch_name, levels = order_sp)
 
-# ==============================================================================
-# 4. PLOTTEN 
-# ==============================================================================
+# --- 4. PLOTTEN ---
 
 p_trend <- ggplot(df_plot_ready, aes(x = dutch_name, y = Aantal)) +
   
