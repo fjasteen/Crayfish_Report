@@ -1,6 +1,6 @@
 # ====================================================
 # Scriptnaam: 03_merge_craywatch-gbif.R
-# Auteur: Frédérique Steen
+# Project: Craywatch
 # Datum: 26-11-2025
 # Beschrijving:
 # - Voegt verwerkte Craywatch en GBIF data samen

@@ -1,13 +1,12 @@
 # ====================================================
 # Scriptnaam: 01_prepare_craywatch_data.R
-# Auteur: Frédérique Steen
+# Project: Craywatch
 # Datum: 26-11-2025
 # Beschrijving:
 # - Leest gevalideerde Craywatch data
 # - Checkt op validatiefouten
 # - Aggregeert per sessie (sampling event)
 # - Slaat verwerkte data op voor gebruik in Script 03 
-# Gebaseerd op: Concepten uit script [04_analyze_validated_data] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---

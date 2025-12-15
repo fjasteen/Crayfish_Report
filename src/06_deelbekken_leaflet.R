@@ -1,6 +1,6 @@
 # ====================================================
-# Scriptnaam: 06_deelbekken_analyse_leaflet.R
-# Auteur: Frédérique Steen
+# Scriptnaam: 06_deelbekken_leaflet.R
+# Project: Craywatch
 # Datum: 27-11-2025
 # Beschrijving:
 # - Genereert leaflet kaarten per soort.
@@ -14,7 +14,6 @@ source("./src/config.R")
 library(htmlwidgets) # Nodig om kaarten op te slaan
 library(RColorBrewer)
 library(rlang)
-library(sf)
 
 # --- 1. Data inlezen ---
 
@@ -70,12 +69,12 @@ for (species_name in gbif_species) {
   
   message(paste("Bezig met:", species_name, "(", n_obs, "waarnemingen )"))
   
-  # --- 4. Spatial Join & Aggregatie ---
+  # --- 4. Spatial join & aggregatie ---
   
-  # Punten naar SF. Let op: dit is nog in WGS84!
+  # Punten naar sf - wgs84(!)
   points_sf <- st_as_sf(df_sp, coords = c("Longitude", "Latitude"), crs = 4326, remove = FALSE)
   
-  # SPATIAL JOIN: Voeg info van deelbekken toe aan de punten
+  # Voeg info van deelbekken toe aan de punten
   points_joined <- st_join(points_sf, subbekkens_sf, join = st_intersects)
   
   # Bepaal ID kolom
@@ -99,7 +98,7 @@ for (species_name in gbif_species) {
       fill_color = if_else(is_active, "#fb6a4a", "transparent") 
     )
   
-  # --- 5. Kaart maken (Leaflet) ---
+  # --- 5. leaflet maken ---
   
   # Popup tekst voor polygonen
   map_polygons$poly_popup <- paste0(
@@ -159,17 +158,42 @@ for (species_name in gbif_species) {
     # Legende Punten & Polygonen (Handmatig HTML)
     addControl(
       html = paste0(
-        "<div style='background:white;padding:8px;border:1px solid #ccc;font-size:12px;line-height:1.6;'>",
-        "<b>Legende ", species_name, "</b><br><hr style='margin: 4px 0;'>",
+        # Container style:
+        # - width: 250px (zorgt dat de tekst ruimte heeft en niet raar afbreekt)
+        # - color: black (forceert zwarte tekst, lost het grijze probleem op)
+        "<div style='background:white; padding:8px; border:1px solid #ccc; font-size:12px; line-height:1.5; width:250px; color:black;'>",
+        
+        # Titel:
+        # We gebruiken <span> voor styling om zeker te zijn dat het niet conflicteert met browser defaults
+        "<b>Waarnemingen van <span style='font-style:italic;'>", species_name, "</span></b><br>",
+        "<b>op deelbekkenniveau</b>",
+        
+        "<hr style='margin: 6px 0;'>",
         
         # Polygoon Legende
-        "<p style='margin: 0;'><b>Deelbekken</b></p>",
-        "<i style='background:#fb6a4a;width:12px;height:12px;display:inline-block;opacity:0.6;border:1px solid red;'></i> Aanwezig in open systeem<br>",
+        "<div style='margin-bottom: 5px;'>",
+        "<p style='margin: 0; font-weight:bold;'>Status van deelbekken</p>",
+        "<i style='background:#fb6a4a; width:12px; height:12px; display:inline-block; opacity:0.6; border:1px solid red; margin-right:5px; vertical-align:middle;'></i>",
+        "<span style='vertical-align:middle;'>aanwezig in open systeem</span>",
+        "</div>",
         
         # Punten Legende
-        "<p style='margin-top: 8px; margin-bottom: 0;'><b>Waarnemingen</b></p>",
-        "<i style='background:#cb181d;width:12px;height:12px;display:inline-block;border-radius:50%;margin-right:5px;'></i> Gekoppeld aan VHAG (Open)<br>",
-        "<i style='background:orange;width:12px;height:12px;display:inline-block;border-radius:50%;margin-right:5px;'></i> WVLC / Geïsoleerd",
+        "<div>",
+        "<p style='margin: 0 0 4px 0; font-weight:bold;'>Waarneming in:</p>",
+        
+        # Item 1
+        "<div style='margin-bottom:2px;'>",
+        "<i style='background:#cb181d; width:12px; height:12px; display:inline-block; border-radius:50%; margin-right:5px; vertical-align:middle;'></i>",
+        "<span style='vertical-align:middle;'>open systeem</span>",
+        "</div>",
+        
+        # Item 2
+        "<div>",
+        "<i style='background:orange; width:12px; height:12px; display:inline-block; border-radius:50%; margin-right:5px; vertical-align:middle;'></i>",
+        "<span style='vertical-align:middle;'>gesloten systeem</span>",
+        "</div>",
+        
+        "</div>",
         "</div>"
       ),
       position = "bottomright"

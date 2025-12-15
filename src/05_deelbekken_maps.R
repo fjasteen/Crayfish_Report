@@ -1,16 +1,14 @@
 # ====================================================
-# Scriptnaam: 05_deelbekken_analyse.R
-# Auteur: Frédérique Steen
+# Scriptnaam: 05_deelbekken_maps.R
+# Project: Craywatch 
 # Datum: 27-11-2025
 # Beschrijving:
-# - Genereert jpg kaarten per soort gebruikmakend van de project baseplot.
+# - genereert jpg kaarten per soort en hun status in de deelbekkens
 # ====================================================
 
 # --- 0. Instellingen laden ---
 source("./src/config.R")
-library(ggplot2) 
 library(rlang)   
-library(sf)
 
 # --- 1. Data inlezen ---
 
@@ -32,10 +30,10 @@ message("Baseplot genereren...")
 base_map <- get_baseplot() 
 
 # 3. Grenzen ophalen uit de base_map
-# In config.R is 'vlaanderen' de eerste laag (layers[[1]])
+# In config.R is 'vlaanderen' de eerste laag (layers[[1]]) van basemap
 vlaanderen_sf <- base_map$layers[[1]]$data
 
-# 4. Transformatie deelbekkens naar Lambert 72 (EPSG:31370)
+# 4. Transformatie deelbekkens naar lambert 72 
 target_crs <- 31370
 deelbekkens_sf <- st_transform(deelbekkens_sf, target_crs)
 
@@ -48,7 +46,7 @@ message("Start genereren van kaarten...")
 
 for (species_name in gbif_species) {
   
-  # Kolomnaam bepalen
+  # kolomnaam bepalen
   sp_col <- tolower(species_name)
   
   if (!sp_col %in% names(df_analyse)) {
@@ -61,7 +59,6 @@ for (species_name in gbif_species) {
     filter(.data[[sp_col]] == 1) %>%
     mutate(
       has_vhag   = !is.na(VHAG),
-      # String exact gelijk aan scale_color_manual
       point_type = if_else(has_vhag, "open systeem", "gesloten systeem - niet gekoppeld")
     )
   
@@ -74,7 +71,7 @@ for (species_name in gbif_species) {
   
   message(paste("Bezig met:", species_name, "(", n_obs, "waarnemingen )"))
   
-  # --- 4. Spatial Join ---
+  # --- 4. Spatial join ---
   points_sf <- st_as_sf(df_sp, coords = c("Longitude", "Latitude"), crs = 4326) %>%
     st_transform(target_crs)
   
@@ -93,51 +90,51 @@ for (species_name in gbif_species) {
     inner_join(counts_per_poly, by = poly_id_col) %>% 
     filter(n_obs_open > 0)
   
-  # --- 5. Plotten ---
+  # --- 5. plotten ---
   
   p <- base_map +
     
-    # Laag 1: Specifieke deelbekken inkleuren
+    # laag 1: gekoloniseerde deelbekkens ingekleurd
     geom_sf(
       data = map_polygons_colored, 
-      aes(fill = "Aanwezigheid in open systeem"), # Let op: exacte match met scale_fill
+      aes(fill = "aanwezigheid in open systeem"), # Let op: exacte match met scale_fill
       color = NA,       
       linewidth = 0,
       alpha = 0.5 
     ) +
     
-    # Laag 2: Alle deelbekken contouren
+    # laag 2: Alle deelbekken contouren
     geom_sf(data = deelbekkens_sf, fill = NA, color = "grey60", linewidth = 0.2) +
     
-    # Laag 3: Punten
+    # Laag 3: punten
     geom_sf(data = points_sf, aes(color = point_type), size = 1.5, alpha = 0.8) +
     
-    # Kleurschalen
+    # kleurschalen
     scale_fill_manual(
-      values = c("Aanwezigheid in open systeem" = "#3182bd"), 
+      values = c("aanwezigheid in open systeem" = "#3182bd"), 
       name = "Status van het deelbekken"
     ) +
     
     scale_color_manual(
-      values = c("open systeem" = "red", "gesloten systeem - niet gekoppeld" = "orange"), 
+      values = c("open systeem" = "#cb181d", "gesloten systeem - niet gekoppeld" = "orange"), 
       name = "Waarneming in:"
     ) +
     
-    # Zorg dat de legende voor de polygonen zichtbaar is
+    # legende voor status deelbekken
     guides(
       fill = guide_legend(
         override.aes = list(color = "black", linewidth = 0.2, alpha = 1)
       )
     ) +
     
-    # Focus op Vlaanderen
+    # focus op Vlaanderen
     coord_sf(
       xlim = st_bbox(vlaanderen_sf)[c(1,3)], 
       ylim = st_bbox(vlaanderen_sf)[c(2,4)],
       expand = FALSE
     ) +
     
-    # Layout
+    # layout
     labs(
       title = paste0("Waarnemingen van ", species_name, " op deelbekkenniveau"),
       subtitle = paste("Aantal waarnemingen:", n_obs),
@@ -152,7 +149,7 @@ for (species_name in gbif_species) {
       legend.text = element_text(size=9)
     )
   
-  # --- 6. Opslaan ---
+  # --- 6. opslaan ---
   file_name <- paste0("map_", gsub(" ", "_", species_name), "_deelbekken.jpg")
   output_path <- file.path(dir_maps, file_name)
   

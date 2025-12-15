@@ -1,6 +1,6 @@
 # ====================================================
 # Scriptnaam: 02_prepare_gbif_data.R
-# Auteur: Frédérique Steen
+# Project: Craywatch
 # Datum: 26-11-2025
 # Beschrijving:
 # - Downloadt recente GBIF data (automatisch indien niet aanwezig)

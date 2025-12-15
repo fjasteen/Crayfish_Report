@@ -1,7 +1,6 @@
 # ==============================================================================
 # Script: 04_link_vhag-wclc.R
-# Auteur: Stien Mertens
-# Refactored by: Frédérique Steen
+# Project: Craywatch
 # Doel:   Koppeling kreeftendata aan VHAG/WVLC 
 # ==============================================================================
 

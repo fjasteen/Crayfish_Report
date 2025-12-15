@@ -1,11 +1,10 @@
 # ====================================================
 # Scriptnaam: 08_aq_sbz_analyse.R
-# Auteur: Frédérique Steen
-# Datum: 27-11-2025 (Updated)
+# Project: Craywatch
+# Datum: 27-11-2025
 # Beschrijving: 
 # - Genereert statische kaarten voor het rapport
 # - Gebruikt SBZ-H en SBP 
-# Gebaseerd op: Concepten uit script [natura2000] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---
