@@ -3,16 +3,13 @@
 # Auteur: Frédérique Steen
 # Datum: 27-11-2025
 # Beschrijving:
-# - Genereert jpg kaarten per soort.
-# - Doel: Visualiseren van de ruimtelijke distributie t.o.v. de deelbekkens.
-# - Bekkenstatus: rood gekleurd als er waarnemingen in het open systeem (VHAG) zijn.
-# - Punten: rood (VHAG-gekoppeld) vs. oranje (WVLC/Niet-gekoppeld).
+# - Genereert jpg kaarten per soort gebruikmakend van de project baseplot.
 # ====================================================
 
 # --- 0. Instellingen laden ---
 source("./src/config.R")
-library(ggplot2) # Nodig voor statische plots
-library(rlang)   # Voor !!sym() / .data[[]]
+library(ggplot2) 
+library(rlang)   
 library(sf)
 
 # --- 1. Data inlezen ---
@@ -23,27 +20,26 @@ if (!file.exists(file_analyse_dataset_rapport)) {
 }
 df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
 
-# B. Shapefiles
+# B. Kaartlagen voorbereiden
 message("Kaartlagen laden...")
 
 # 1. Deelbekken via API
-subbekkens_sf <- st_read(url_wfs_deelbekken, quiet = TRUE) %>%
+deelbekkens_sf <- st_read(url_wfs_deelbekken, quiet = TRUE) %>%
   st_make_valid() 
 
-# 2. Vlaanderen grenzen (voor de uitsnede en achtergrond)
-if (!file.exists(file_vlaanderen_grenzen)) stop("Shapefile Vlaanderen niet gevonden!")
-vlaanderen_sf <- st_read(file_vlaanderen_grenzen, quiet = TRUE) %>%
-  st_make_valid()
+# 2. Baseplot genereren
+message("Baseplot genereren...")
+base_map <- get_baseplot() 
 
-# --- Transformatie naar Lambert 72 (EPSG:31370) ---
-# Voor statische kaarten van Vlaanderen is dit mooier dan WGS84 (minder vervorming)
+# 3. Grenzen ophalen uit de base_map
+# In config.R is 'vlaanderen' de eerste laag (layers[[1]])
+vlaanderen_sf <- base_map$layers[[1]]$data
+
+# 4. Transformatie deelbekkens naar Lambert 72 (EPSG:31370)
 target_crs <- 31370
+deelbekkens_sf <- st_transform(deelbekkens_sf, target_crs)
 
-message("Transformeren naar Lambert 72...")
-subbekkens_sf <- st_transform(subbekkens_sf, target_crs)
-vlaanderen_sf <- st_transform(vlaanderen_sf, target_crs)
-
-# Map voor output aanpassen naar ./maps/deelbekken
+# Map voor output
 dir_maps <- file.path(dir_data_output, "maps", "deelbekken")
 if (!dir.exists(dir_maps)) dir.create(dir_maps, recursive = TRUE)
 
@@ -61,13 +57,12 @@ for (species_name in gbif_species) {
   }
   
   # --- 3. Data prepareren ---
-  
-  # Filter data voor deze soort
   df_sp <- df_analyse %>%
     filter(.data[[sp_col]] == 1) %>%
     mutate(
       has_vhag   = !is.na(VHAG),
-      point_type = if_else(has_vhag, "VHAG (Open)", "WVLC/Niet gekoppeld")
+      # String exact gelijk aan scale_color_manual
+      point_type = if_else(has_vhag, "open systeem", "gesloten systeem - niet gekoppeld")
     )
   
   n_obs <- nrow(df_sp)
@@ -80,86 +75,85 @@ for (species_name in gbif_species) {
   message(paste("Bezig met:", species_name, "(", n_obs, "waarnemingen )"))
   
   # --- 4. Spatial Join ---
-  
-  # Punten naar sf en transformeren naar Lambert
   points_sf <- st_as_sf(df_sp, coords = c("Longitude", "Latitude"), crs = 4326) %>%
     st_transform(target_crs)
   
-  # Join punten met deelbekken
-  points_joined <- st_join(points_sf, subbekkens_sf, join = st_intersects)
+  points_joined <- st_join(points_sf, deelbekkens_sf, join = st_intersects)
   
-  # Bepaal ID kolom
   poly_id_col <- "DEELBID" 
-  if (!poly_id_col %in% names(subbekkens_sf)) poly_id_col <- names(subbekkens_sf)[1]
+  if (!poly_id_col %in% names(deelbekkens_sf)) poly_id_col <- names(deelbekkens_sf)[1]
   
-  # Tel waarnemingen in open systemen per bekken
   counts_per_poly <- points_joined %>%
     st_drop_geometry() %>%
     filter(has_vhag == TRUE) %>%
     filter(!is.na(.data[[poly_id_col]])) %>%
     count(.data[[poly_id_col]], name = "n_obs_open")
   
-  # Koppel terug aan polygonen en filter meteen
-  # We houden enkel de polygonen over die we willen kleuren (n_obs_open > 0)
-  map_polygons_colored <- subbekkens_sf %>%
-    inner_join(counts_per_poly, by = poly_id_col) %>% # behoudt enkel matches
+  map_polygons_colored <- deelbekkens_sf %>%
+    inner_join(counts_per_poly, by = poly_id_col) %>% 
     filter(n_obs_open > 0)
   
-  # --- 5. Plotten met GGPLOT2 ---
+  # --- 5. Plotten ---
   
-  p <- ggplot() +
-    # Laag 1: Vlaanderen als grijze achtergrond/border
-    geom_sf(data = vlaanderen_sf, fill = "grey95", color = "black", linewidth = 0.5) +
+  p <- base_map +
     
-    # Laag 2: ALLE deelbekken contouren 
-    geom_sf(data = subbekkens_sf, fill = NA, color = "grey70", linewidth = 0.2) +
-    
-    # Laag 3: Specifieke deelbekken inkleuren 
+    # Laag 1: Specifieke deelbekken inkleuren
     geom_sf(
       data = map_polygons_colored, 
-      aes(fill = "Aanwezig in Open Systeem"), 
-      color = "grey50", # Iets donkerder randje voor de actieve bekkens
-      linewidth = 0.2,
-      alpha = 0.7
+      aes(fill = "Aanwezigheid in open systeem"), # Let op: exacte match met scale_fill
+      color = NA,       
+      linewidth = 0,
+      alpha = 0.5 
     ) +
     
-    # Laag 4: Punten
+    # Laag 2: Alle deelbekken contouren
+    geom_sf(data = deelbekkens_sf, fill = NA, color = "grey60", linewidth = 0.2) +
+    
+    # Laag 3: Punten
     geom_sf(data = points_sf, aes(color = point_type), size = 1.5, alpha = 0.8) +
     
     # Kleurschalen
     scale_fill_manual(
-      values = c("Aanwezig in open systeem" = "#3182bd"), # Mooi blauw
+      values = c("Aanwezigheid in open systeem" = "#3182bd"), 
       name = "Status van het deelbekken"
     ) +
     
     scale_color_manual(
-      values = c("VHAG (Open)" = "red", "WVLC & niet gekoppeld" = "orange"),
-      name = "Type Waarneming"
+      values = c("open systeem" = "red", "gesloten systeem - niet gekoppeld" = "orange"), 
+      name = "Waarneming in:"
     ) +
     
-    # Focus op Vlaanderen (BBox)
+    # Zorg dat de legende voor de polygonen zichtbaar is
+    guides(
+      fill = guide_legend(
+        override.aes = list(color = "black", linewidth = 0.2, alpha = 1)
+      )
+    ) +
+    
+    # Focus op Vlaanderen
     coord_sf(
       xlim = st_bbox(vlaanderen_sf)[c(1,3)], 
       ylim = st_bbox(vlaanderen_sf)[c(2,4)],
       expand = FALSE
     ) +
     
-    # Layout en titels
+    # Layout
     labs(
-      title = species_name,
-      subtitle = paste("Totaal waarnemingen:", n_obs),
+      title = paste0("Waarnemingen van ", species_name, " op deelbekkenniveau"),
+      subtitle = paste("Aantal waarnemingen:", n_obs),
       x = NULL, y = NULL
     ) +
-    theme_void() + 
+    
     theme(
       legend.position = "right",
-      plot.title = element_text(face = "bold", size = 14, hjust = 0.5),
-      plot.subtitle = element_text(hjust = 0.5, margin = margin(b = 10)),
-      plot.background = element_rect(fill = "white", color = NA)
+      plot.title = element_text(face = "bold.italic", size = 14, hjust = 0.5),
+      plot.subtitle = element_text(hjust = 0.5, margin = margin(b = 10, t=10)),
+      legend.title = element_text(face="bold", size=10),
+      legend.text = element_text(size=9)
     )
   
-  # --- 6. Opslaan als JPG ---
-  file_name <- paste0("kaart_", gsub(" ", "_", species_name), ".jpg")
+  # --- 6. Opslaan ---
+  file_name <- paste0("map_", gsub(" ", "_", species_name), "_deelbekken.jpg")
   output_path <- file.path(dir_maps, file_name)
   
   ggsave(output_path, plot = p, width = 10, height = 8, dpi = 300)

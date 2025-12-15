@@ -1,9 +1,13 @@
 ---
 Author: Stien Mertens
 Refactored by: Frédérique Steen
-title: 'craywatch: fc trend evaluation'
+title: 'Craywatch: fysicochemische data trend evaluatie'
 output: html_document
 date: "2025-10-24"
+knit: (function(inputFile, encoding) { 
+  source("config.R", local = TRUE);
+  rmarkdown::render(inputFile, encoding = encoding, output_dir = dir_trends_output) 
+  })
 ---
 
 # Laad packages

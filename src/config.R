@@ -44,6 +44,7 @@ dir_urbanisation_output <- file.path(dir_data_output, "urbanisation")
 dir_watertype_output <- file.path(dir_data_output, "watertype")
 dir_gridcell_output <- file.path(dir_data_output, "gridcell")
 dir_craywatch_output  <- file.path(root_craywatch_app, "R", "data", "output")
+dir_trends_output <- file.path(dir_data_output, "fc_trends")
 
 dir_citizen_stats_output <- file.path(dir_data_output, "citizen_stats")
 dir_maps_output <- file.path(dir_data_output, "maps")
@@ -58,7 +59,7 @@ required_dirs <- c(
   dir_gbif_input, dir_gbif_intermediate, dir_shapefiles,
   dir_craywatch_output, dir_urbanisation_output, dir_watertype_output,
   dir_maps_output, dir_maps_cpue, dir_gridcell_output, dir_citizen_stats_output, 
-  dir_maps_craywatch, dir_maps_catc
+  dir_maps_craywatch, dir_maps_catc, dir_trends_output
 )
 
 invisible(lapply(required_dirs, function(x) {
