@@ -8,8 +8,6 @@
 
 # --- 0. Instellingen laden ---
 source("./src/config.R")
-library(tidyverse)
-library(sf)
 library(flextable)
 library(officer)
 
@@ -22,7 +20,7 @@ df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
 # Deelbekkens ophalen
 subbekkens_sf <- st_read(url_wfs_deelbekken, quiet = TRUE) %>%
   st_make_valid() %>%
-  st_transform(31370)
+  st_transform(crs_lambert)
 
 name_col <- "DEELBEKNM"
 if (!name_col %in% names(subbekkens_sf)) name_col <- names(subbekkens_sf)[1]
@@ -46,8 +44,8 @@ for (species_name in gbif_species) {
     )
   
   if (nrow(df_sp) > 0) {
-    points_sf <- st_as_sf(df_sp, coords = c("Longitude", "Latitude"), crs = 4326) %>%
-      st_transform(31370)
+    points_sf <- st_as_sf(df_sp, coords = c("Longitude", "Latitude"), crs = crs_wgs84) %>%
+      st_transform(crs_lambert)
     
     joined <- st_join(points_sf, subbekkens_sf, join = st_intersects)
     

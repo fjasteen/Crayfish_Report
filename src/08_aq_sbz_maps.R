@@ -10,17 +10,13 @@
 # --- 0. Instellingen laden ---
 source("./src/config.R")
 
-# Libraries zijn al geladen in config, maar voor zekerheid:
-library(tidyverse)
-library(sf)
+# Libraries 
 library(leaflet)
 library(htmltools) # voor HTML() in labels
 
 # --- 1. Ruimtelijke lagen opladen ---
 message("Ruimtelijke lagen inladen...")
-# Laadt alle beschermingslagen en de gefilterde kreeftendata (CF_presence)
-# Hierdoor zijn de variabelen 'natura_2000_aq' en 'CF_presence' beschikbaar.
-source("./src/05_load_aq_sbz.R")
+source("./src/07_load_aq_sbz.R")
 
 # Vlaanderen (Referentie)
 vlaanderen <- st_read(file_vlaanderen_grenzen, quiet = TRUE) %>%
@@ -79,7 +75,7 @@ plot_protected_map <- function(base_layer, points_layer, outfile,
 plot_protected_map(
   base_layer = hbtrl,
   points_layer = CF_presence,
-  outfile = file.path(dir_bescherming_output, "map_hbtrl.png")
+  outfile = file_map_hbtrl
 )
 
 # 2. SBP 
@@ -88,7 +84,7 @@ plot_protected_map(
   base_layer   = sbp_pgs_aq,     # De groene vlakken
   line_layer   = sbp_vissen %>% st_cast("MULTILINESTRING"),     # De blauwe lijnen
   points_layer = CF_presence,
-  outfile      = file.path(dir_bescherming_output, "map_sbp.png"),
+  outfile      = file_map_sbp,
   fill_col     = "darkgreen",
   line_col     = "lightgreen",         # Blauw voor de waterlopen
   alpha        = 0.8

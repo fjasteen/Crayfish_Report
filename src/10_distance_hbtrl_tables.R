@@ -1,6 +1,6 @@
 # ==============================================================================
-# Scriptnaam:   10_sbz_analyse_afstanden.R
-# Auteur: Frédérique Steen
+# Scriptnaam:   10_distance_hbtrl_tables.R
+# Project: Craywatch
 # Beschrijving: 
 #   1. Analyseert ruimtelijke relaties tussen kreeftenpopulaties en SBZ-H gebieden.
 #   2. Bepaalt de status per gebied: In gebied, <100m of <1000m.

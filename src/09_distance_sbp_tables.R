@@ -1,6 +1,6 @@
 # ==============================================================================
-# Scriptnaam:   src/09_sbp_analyse_afstanden_compact.R
-# Auteur: Frédérique Steen
+# Scriptnaam:   src/09_sbp_analyse_afstanden.R
+# Project: Craywatch
 # Beschrijving: 
 #   1. Analyseert ruimtelijke relaties tussen kreeften en SBP (Vissen + Pgs).
 #   2. Aggregeert gebieden tot één lijst per status-categorie om de tabel compact te houden.
@@ -8,7 +8,7 @@
 #
 # Afhankelijkheden:
 #   - src/config.R
-#   - src/05_load_aq_sbz.R
+#   - src/07_load_aq_sbz.R
 #
 # Output:
 #   - Word: data/output/.../tabel_afstanden_sbp_compact_A4.docx
@@ -16,14 +16,11 @@
 
 # --- 0. Instellingen & Data laden ---
 source("./src/config.R")
-library(tidyverse)
-library(sf)
 library(flextable)
 library(officer)
-library(lubridate) 
 
 # Laad de basisdata 
-source("./src/05_load_aq_sbz.R")
+source("./src/07_load_aq_sbz.R")
 
 message("--- Start Ruimtelijke Analyse (SBP Compact) ---")
 
@@ -88,7 +85,7 @@ clouds_sf <- create_clouds(CF_presence)
 if(is.null(clouds_sf)) stop("Geen wolken.")
 
 
-# --- 3. Ruimtelijke Koppeling ---
+# --- 3. Ruimtelijke koppeling ---
 message("Intersecties berekenen...")
 
 # Status categorieën toevoegen
@@ -119,12 +116,12 @@ base_stats <- all_matches %>%
     .groups = "drop"
   )
 
-# Stap 4b: aggregeren: Gebieden samenvoegen in één string
+# Stap 4b: aggregeren: gebieden samenvoegen in één string
 final_compact <- base_stats %>%
-  # maak de string per gebied: "gebied (Jaar)"
+  # maak de string per gebied: "gebied (jaar)"
   mutate(gebied_str = paste0(gebied, " (", Jaartal, ")")) %>%
   
-  # groepeer op Kreeft, Doelsoort en Status
+  # groepeer op kreeft, soort en status
   group_by(species, Doelsoort, Locatie_Status, Locatie_Cat_Order) %>%
   
   # gebieden aan elkaar plakken gescheiden met een puntkomma
@@ -201,7 +198,7 @@ ft <- flextable(final_compact) %>%
   fix_border_issues()
 
 
-# --- 6. Opslaan naar Word ---
+# --- 6. Opslaan naar word ---
 outfile_doc <- file.path(dir_bescherming_output, "tabel_afstanden_sbp_compact_A4.docx")
 
 doc <- read_docx() %>%

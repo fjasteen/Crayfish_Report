@@ -1,11 +1,10 @@
 # ====================================================
 # Scriptnaam: 07_load_aq_sbz.R
-# Auteur: Frédérique Steen
+# Project: Craywatch
 # Beschrijving: 
 # - Laadt alle ruimtelijke beschermingslagen (N2000, SBP, HBTRL)
 # - Laadt en verwerkt de kreeftendata (CF_presence)
-# - Transformeert alles naar CRS Lambert (31370)
-# Gebaseerd op: Concepten uit script [natura2000] van M. Vermeylen
+# - Transformeert alles naar crs lambert
 # ====================================================
 
 # We gaan ervan uit dat config.R al geladen is door het moederscript
@@ -60,16 +59,15 @@ if (!exists("sbp_vissen")) {
     mutate(habitat_id = row_number())
 }
 
-# 4. Kreeftendata (Analysedataset)
+# 4. Kreeftendata (analysedataset)
 # ----------------------------------------------------
 if (!exists("CF_presence")) {
   message("Laden Kreeftendata & Transformatie...")
   
   # Lees CSV
-  CF_data_raw <- readr::read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
+  CF_data_raw <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
   
-  # FIX: Forceer alle kolomnamen naar kleine letters
-  # Dit lost het probleem op als de kolom 'Date', 'DATE' of 'date' heet
+  # Forceer alle kolomnamen naar kleine letters
   names(CF_data_raw) <- tolower(names(CF_data_raw))
   
   # Check of 'date' kolom bestaat (eventueel hernoemen van 'datum')
@@ -96,7 +94,7 @@ if (!exists("CF_presence")) {
     # Datum conversie (veilig)
     mutate(
       # Als read_csv het al als Date herkende, doe niets. Anders parse.
-      date = if(inherits(date, "Date")) date else lubridate::ymd(date)
+      date = if(inherits(date, "Date")) date else ymd(date)
     ) %>%
     pivot_longer(
       cols      = all_of(species_columns),
@@ -115,7 +113,7 @@ if (!exists("CF_presence")) {
   # Omzetten naar SF object (Punten) en transformeren naar Lambert
   CF_presence <- CF_long %>%
     filter(presence == 1) %>%
-    st_as_sf(coords = c("longitude", "latitude"), crs = 4326) %>%
+    st_as_sf(coords = c("longitude", "latitude"), crs = crs_wgs84) %>%
     st_transform(crs_lambert)
 }
 

@@ -23,13 +23,13 @@ if (!file.exists(file_analyse_dataset_rapport)) {
 }
 df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
 
-# B. Shapefiles (Subbekkens) - Via API
+# B. Shapefiles (deelbekkens) - Via API
 message("Deelbekken ophalen via API...")
 
-# Deelbekken inlezen, valide maken en naar WGS84 transformeren voor Leaflet
+# Deelbekken inlezen, valide maken en naar wgs84 transformeren voor leaflet
 subbekkens_sf <- st_read(url_wfs_deelbekken, quiet = TRUE) %>%
   st_make_valid() %>%
-  st_transform(4326) # Leaflet vereist WGS84 (EPSG:4326)
+  st_transform(crs_wgs84) 
 
 # Output map
 dir_maps <- file.path(dir_data_output, "maps", "deelbekken")
@@ -72,7 +72,7 @@ for (species_name in gbif_species) {
   # --- 4. Spatial join & aggregatie ---
   
   # Punten naar sf - wgs84(!)
-  points_sf <- st_as_sf(df_sp, coords = c("Longitude", "Latitude"), crs = 4326, remove = FALSE)
+  points_sf <- st_as_sf(df_sp, coords = c("Longitude", "Latitude"), crs = crs_wgs84, remove = FALSE)
   
   # Voeg info van deelbekken toe aan de punten
   points_joined <- st_join(points_sf, subbekkens_sf, join = st_intersects)
@@ -121,12 +121,12 @@ for (species_name in gbif_species) {
   m <- leaflet(options = leafletOptions(minZoom = 7)) %>% # minZoom om op Vlaanderen te blijven
     addProviderTiles(providers$CartoDB.Positron) %>%
     
-    # Alle deelbekken grenzen als achtergrond (NU ROOD)
+    # Alle deelbekken grenzen als achtergrond 
     addPolygons(
       data = subbekkens_sf,
-      fill = FALSE, # Geen vulling
-      color = "red", # ROOD
-      weight = 0.5, # Dikkere lijn
+      fill = FALSE, 
+      color = "red", 
+      weight = 0.5, 
       group = "Alle Grenzen"
     ) %>%
     
@@ -135,7 +135,7 @@ for (species_name in gbif_species) {
       data = map_polygons,
       fillColor = ~fill_color, 
       fillOpacity = ~if_else(is_active, 0.6, 0.0), # Actieve bekkens half-transparant
-      color = "red", # Randkleur (Rood voor actieve bekkens, om de rode vulling te omsluiten)
+      color = "red", # randkleur (Rood voor actieve bekkens, om de rode vulling te omsluiten)
       weight = 0.5, 
       popup = ~poly_popup, 
       group = "Deelbekken"
@@ -155,29 +155,28 @@ for (species_name in gbif_species) {
       group = "Waarnemingen"
     ) %>%
     
-    # Legende Punten & Polygonen (Handmatig HTML)
+    # Legende punten & polygonen 
     addControl(
       html = paste0(
         # Container style:
         # - width: 250px (zorgt dat de tekst ruimte heeft en niet raar afbreekt)
-        # - color: black (forceert zwarte tekst, lost het grijze probleem op)
+        # - color: black (forceert zwarte tekst)
         "<div style='background:white; padding:8px; border:1px solid #ccc; font-size:12px; line-height:1.5; width:250px; color:black;'>",
         
         # Titel:
-        # We gebruiken <span> voor styling om zeker te zijn dat het niet conflicteert met browser defaults
         "<b>Waarnemingen van <span style='font-style:italic;'>", species_name, "</span></b><br>",
         "<b>op deelbekkenniveau</b>",
         
         "<hr style='margin: 6px 0;'>",
         
-        # Polygoon Legende
+        # Polygoon legende
         "<div style='margin-bottom: 5px;'>",
         "<p style='margin: 0; font-weight:bold;'>Status van deelbekken</p>",
         "<i style='background:#fb6a4a; width:12px; height:12px; display:inline-block; opacity:0.6; border:1px solid red; margin-right:5px; vertical-align:middle;'></i>",
         "<span style='vertical-align:middle;'>aanwezig in open systeem</span>",
         "</div>",
         
-        # Punten Legende
+        # Punten legende
         "<div>",
         "<p style='margin: 0 0 4px 0; font-weight:bold;'>Waarneming in:</p>",
         
