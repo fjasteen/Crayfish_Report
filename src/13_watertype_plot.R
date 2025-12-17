@@ -1,6 +1,6 @@
 # ====================================================
 # Scriptnaam: 13_watertype_plot_glmm.R
-# Auteur: Frédérique Steen
+# Project: Craywatch
 # Datum: 01-12-2025
 # Beschrijving: 
 # - Classificeert waarnemingen als gesloten of open
