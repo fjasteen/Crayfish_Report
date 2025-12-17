@@ -1,6 +1,6 @@
 # ====================================================
 # Scriptnaam: 14_watertype_glmm.R
-# Auteur: Frédérique Steen
+# Projec: Craywatch
 # Datum: 01-12-2025
 # Beschrijving: 
 # - Laadt verwerkte data uit Script 10 (RDS)
