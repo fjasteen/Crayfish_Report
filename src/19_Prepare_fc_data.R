@@ -1,7 +1,6 @@
 # ====================================================
 # Scriptnaam: 19_Prepare_fc_data.R
-# Auteur: Stien Mertens
-# Refactored door: Frédérique Steen
+# Project: Craywatch
 # Datum: 04-12-2025
 # Beschrijving: 
 # - Ruimtelijke validatie van de fysicochemische data (koppelen aan VHAG/WVLC)
@@ -15,19 +14,25 @@ library(units)
 # --- 1. Data & shapefiles laden ---
 message("Laden FC data en referentielagen...")
 
-load(file = here("data", "input", "fc_data", "fc_fc_data_breed.Rdata")) 
-load(file = here("data", "input", "fc_data", "fc_data.Rdata")) 
+file_fc_breed_input <- file.path(dir_data_input, "fc_data", "fc_fc_data_breed.Rdata")
+file_fc_long_input  <- file.path(dir_data_input, "fc_data", "fc_data.Rdata")
+
+if(!file.exists(file_fc_breed_input)) stop("FC breed data niet gevonden!")
+if(!file.exists(file_fc_long_input)) stop("FC data niet gevonden!")
+
+load(file_fc_breed_input) # Laadt object 'fc_breed'
+load(file_fc_long_input)  # Laadt object 'fc_data'
 
 # GIS Referentielagen transformeren naar Lambert (31370)
-waterloopsegmenten <- read_sf(file_waterloopsegmenten) %>% st_transform(31370)
-watervlakken       <- read_sf(file_watervlakken) %>% st_transform(31370)
-watergang          <- read_sf(file_watergang) %>% st_transform(31370) 
+waterloopsegmenten <- read_sf(file_waterloopsegmenten) %>% st_transform(crs_lambert)
+watervlakken       <- read_sf(file_watervlakken) %>% st_transform(crs_lambert)
+watergang          <- read_sf(file_watergang) %>% st_transform(crs_lambert) 
 
 # ==============================================================================
 # FC meetpunten aan WVLC en VHAG koppelen (valideren)
 # ==============================================================================
 
-# --- 2. Ruimtelijke Koppeling (Berekeningen) ---
+# --- 2. Ruimtelijke koppeling (berekeningen) ---
 message("--- Start Ruimtelijke Koppeling ---")
 
 columns_to_keep <-c("sample_point", "sample_datum_monstername", "sample_tijdstip_monstername",
@@ -82,6 +87,7 @@ fc_candidates_distant <- fc_raw_spatial_calc %>%
 # 4. fc_valid_width_corrected:
 #    Punten die ver liggen, maar wel binnen 10 m van de rivierbreedte vallen (via GRB)
 fc_valid_width_corrected <- fc_candidates_distant %>%
+  
   # Enkel rivieren kunnen we checken op breedte (meren hebben geen lineaire breedte)
   filter(is_river == TRUE) %>%
   
@@ -100,15 +106,14 @@ fc_valid_width_corrected <- fc_candidates_distant %>%
   # Check of punt binnen buffer valt
   filter(distances <= max_allowed_dist) %>%
   
-  # Zorg dat kolommen gelijk zijn aan de strict set voor samenvoegen
+  # Zorg dat kolommen gelijk zijn aan de 'strict' set voor samenvoegen
   select(any_of(colnames(fc_valid_strict)))
 
 # 5. fc_locations_validated:
 #    finale set van unieke locaties (strict + width corrected)
 fc_locations_validated <- bind_rows(fc_valid_strict, fc_valid_width_corrected) %>%
   dplyr::select(-VHAS, -VHAG, -WVLC, -sample_datum_monstername, -sample_tijdstip_monstername) %>%
-  dplyr::rename(VHAS = VHASFinal, VHAG = VHAGFinal, WVLC = WVLCFinal) %>%
-  drop_geometry()
+  dplyr::rename(VHAS = VHASFinal, VHAG = VHAGFinal, WVLC = WVLCFinal) 
 
 message(paste0("Totaal unieke FC-locaties na validatie: ", nrow(fc_locations_validated)))
 
@@ -134,7 +139,7 @@ if (interactive()) {
 
 # exporteer de gekoppelde fc locaties
 if(!dir.exists(dirname(file_fc_locations_validated))) dir.create(dirname(file_fc_locations_validated), recursive = TRUE)
-save(fc_locations_data, file = file_fc_locations_validated) 
+save(fc_locations_validated, file = file_fc_locations_validated) 
 
 # ==============================================================================
 # Enkel FC waarden van gekoppelde FC meetlocaties houden
@@ -142,6 +147,8 @@ save(fc_locations_data, file = file_fc_locations_validated)
 message("--- Start constructie FC dataset ---")
 
 # --- 5. fc data aan gekoppelde fc locaties koppelen ---
+fc_locations_validated <- st_drop_geometry(fc_locations_validated)
+
 fc_locations_data <- fc_breed %>%
   # 1. koppelen (geen inner_join? alle waarden behouden?)
   left_join(fc_locations_validated, by = "sample_point") %>%

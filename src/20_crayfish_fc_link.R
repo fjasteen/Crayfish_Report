@@ -10,7 +10,7 @@
 # ====================================================
 
 # --- 0. Setup ---
-source(./src/config.R)
+source("./src/config.R")
 
 library(qgisprocess)
 library(purrr)
@@ -308,7 +308,7 @@ mapview(waterloop)+mapview(data_fc_vhag_sub, col.regions="orange")+mapview(fc_lo
 # #visualiseer oversort issues
 # waterloop_sub <- waterloop%>%
 #   dplyr::filter(VHAG%in%data_fc_vhag$VHAG[data_fc_vhag$overstort_issue==T])
-  # er zijn geen oversorten aanwezig tussen de kreeften en FC punten
+  # er zijn geen overstorten aanwezig tussen de kreeften en FC punten
 
 
 # --- 8. Samenvoegen datasets ---
