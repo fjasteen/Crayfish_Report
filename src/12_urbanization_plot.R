@@ -55,7 +55,7 @@ cray_urban$type_urban <- factor(
 # Omzetten naar long format
 cray_long <- cray_urban %>%
   pivot_longer(
-    cols = all_of(required_species), 
+    cols = all_of(tolower(gbif_species)), 
     names_to = "species",
     values_to = "presence"
   ) %>%
