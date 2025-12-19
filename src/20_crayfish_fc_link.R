@@ -16,7 +16,8 @@ library(qgisprocess)
 library(purrr)
 library(sf)
 library(dplyr)
-library(here) 
+library(here)
+library(mapview)
 
 # --- 1. Data laden ---
 # Waterlopen (nodig voor QGIS-analyse van aangrenzende segmenten)

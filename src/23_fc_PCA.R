@@ -15,13 +15,13 @@ FC_data_sf <- FC_data %>%
   st_as_sf(coords = c("Longitude", "Latitude"), crs = 4326) 
 
 FC_data_sf$faxonius.limosus.status <- factor(
-  FC_data_sf$faxonius.limosus, 
+  FC_data_sf$`faxonius limosus`, 
   levels = c(0, 1), 
   labels = c("Afwezig", "Aanwezig")
 )
 
 FC_data_sf$procambarus.clarkii.status <- factor(
-  FC_data_sf$procambarus.clarkii, 
+  FC_data_sf$`procambarus clarkii`, 
   levels = c(0, 1), 
   labels = c("Afwezig", "Aanwezig")
 )
@@ -80,45 +80,45 @@ if (nrow(site_scores) != nrow(FC_data)) {
 
 # Voeg plot kleur data toe (faxonius limosus)
 ordinated_data <- site_scores %>%
-  add_column(faxonius.limosus = FC_data$faxonius.limosus)
+  add_column(`faxonius limosus` = FC_data$`faxonius limosus`)
 
 ordinated_data_clean <- ordinated_data %>%
-  mutate(faxonius.limosus = factor(
+  mutate(`faxonius limosus` = factor(
     case_when(
-      is.na(faxonius.limosus) ~ "Onbekend",
-      faxonius.limosus == 1 ~ "Aanwezig",
-      faxonius.limosus == 0 ~ "Afwezig"
+      is.na(`faxonius limosus`) ~ "Onbekend",
+      `faxonius limosus` == 1 ~ "Aanwezig",
+      `faxonius limosus` == 0 ~ "Afwezig"
     ),
     levels = c("Afwezig", "Aanwezig", "Onbekend")
   ))
 
 # Filter de NA's er uit
 ordinated_data_clean_no_NA <- ordinated_data_clean %>%
-  filter(!faxonius.limosus == "Onbekend")
+  filter(!`faxonius limosus` == "Onbekend")
 
 # voeg plot kleur toe (Procambarus clarkii)
 ordinated_data_PC <- site_scores %>%
-  add_column(procambarus.clarkii = FC_data$procambarus.clarkii)
+  add_column(`procambarus clarkii` = FC_data$`procambarus clarkii`)
 
 ordinated_data_PC_clean <- ordinated_data_PC %>%
-  mutate(procambarus.clarkii = factor(
+  mutate(`procambarus clarkii` = factor(
     case_when(
-      is.na(procambarus.clarkii) ~ "Onbekend",
-      procambarus.clarkii == 1 ~ "Aanwezig",
-      procambarus.clarkii == 0 ~ "Afwezig"
+      is.na(`procambarus clarkii`) ~ "Onbekend",
+      `procambarus clarkii` == 1 ~ "Aanwezig",
+      `procambarus clarkii` == 0 ~ "Afwezig"
     ),
     levels = c("Afwezig", "Aanwezig", "Onbekend")
   ))
 
 ordinated_data_PC_clean_no_NA <- ordinated_data_PC_clean %>%
-  filter(!procambarus.clarkii == "Onbekend")
+  filter(!`procambarus clarkii` == "Onbekend")
 
 ordinated_data_cpue_PC <- site_scores %>%
-  add_column(CPUE_procambarus.clarkii = FC_data$CPUE_procambarus.clarkii)
+  add_column(`CPUE_procambarus clarkii` = FC_data$`CPUE_procambarus clarkii`)
 
 # Soortpijl berekenen (faxonius limosus)
 # We gebruiken de binaire kolom direct uit FC_data
-soort_vector <- FC_data$faxonius.limosus
+soort_vector <- FC_data$`faxonius limosus`
 
 # We moeten filteren op NA's in de soort vector en de PC-scores
 data_gefilterd <- data.frame(
@@ -160,7 +160,7 @@ fc_scores_totaal <- bind_rows(fc_scores, soort_scores)
 
 # Faxonius limosus
 plot_pca <- ggplot(ordinated_data_clean_no_NA , aes(x = PC1, y = PC2)) +
-  geom_point(aes(color = faxonius.limosus), size = 3) + # shape = type_observed
+  geom_point(aes(color = `faxonius limosus`), size = 3) + # shape = type_observed
   labs(color = "Aanwezigheid gevlekte\nAmerikaanse rivierkreeft") +
   scale_color_manual(values = c("Afwezig" = "lightblue", "Aanwezig" = "darkmagenta"
                                 # , "Onbekend" = "gray70"
@@ -186,7 +186,7 @@ plot_pca
 
 # Soortpijl berekenen (Procambarus clarkii)
 # We gebruiken de binaire kolom direct uit FC_data
-soort_vector_PC <- FC_data$procambarus.clarkii
+soort_vector_PC <- FC_data$`procambarus clarkii`
 
 # We moeten filteren op NA's in de soort vector en de PC-scores
 data_gefilterd <- data.frame(
@@ -216,7 +216,7 @@ fc_scores_totaal_PC <- bind_rows(fc_scores, soort_scores_PC)
 
 # Procambarus clarkii
 plot_pca <- ggplot(ordinated_data_PC_clean_no_NA , aes(x = PC1, y = PC2)) +
-  geom_point(aes(color = procambarus.clarkii), size = 3) + # shape = type_observed
+  geom_point(aes(color = `procambarus clarkii`), size = 3) + # shape = type_observed
   labs(color = "Aanwezigheid rode\nAmerikaanse rivierkreeft") +
   scale_color_manual(values = c("Afwezig" = "lightblue", "Aanwezig" = "darkmagenta"
                                 # , "Onbekend" = "gray70"
@@ -244,12 +244,12 @@ plot_pca
 # plot_pca <- ggplot(ordinated_data_cpue_PC , aes(x = PC1, y = PC2)) +
 #   stat_ellipse(
 #     data = ordinated_data_cpue_PC,
-#     aes(color = CPUE_procambarus.clarkii), # Kleurt de ellips volgens de "Aanwezig" kleur
+#     aes(color = `CPUE_procambarus clarkii`), # Kleurt de ellips volgens de "Aanwezig" kleur
 #     level = 0.95,
 #     linetype = "solid",
 #     linewidth = 1 
 #   ) +
-#   geom_point(aes(color = CPUE_procambarus.clarkii), size = 3) + # shape = type_observed
+#   geom_point(aes(color = `CPUE_procambarus clarkii`), size = 3) + # shape = type_observed
 #   labs(color = "CPUE P. clarkii") +
 #   theme_minimal() +
 #   ggtitle("PCA") +
