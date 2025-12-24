@@ -24,3 +24,6 @@ data/output/
 *.tmp
 *.log
 cache/
+
+# Large files
+data/intermediate/data_fc_cray_notAvg.txt
