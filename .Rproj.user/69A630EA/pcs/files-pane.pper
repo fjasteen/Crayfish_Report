@@ -6,8 +6,8 @@
         },
         {
             "columnIndex": 2,
-            "ascending": true
+            "ascending": false
         }
     ],
-    "path": "~/GitHub/Crayfish_Report/data/input/shapefiles"
+    "path": "~/GitHub/Crayfish_Report"
 }
