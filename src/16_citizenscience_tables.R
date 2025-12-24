@@ -86,7 +86,7 @@ style_flextable <- function(ft) {
 }
 
 doc_report <- read_docx() %>%
-  body_add_par("Metadata Rapportage Craywatch", style = "heading 1") %>%
+  body_add_par("Citizen Science Rapportage Craywatch", style = "heading 1") %>%
   body_add_fpar(fpar(ftext(paste("Gegenereerd op:", Sys.Date()), prop = style_calibri_11))) %>%
   body_add_par("", style = "Normal") 
 
@@ -307,7 +307,7 @@ doc_report <- doc_report %>%
   body_add_fpar(fpar(ftext(noot_soorten, prop = style_calibri_11)))
 
 # --- 4. Opslaan ---
-outfile_rapport <- file.path(dir_citizen_stats_output, "craywatch_metadata_rapport.docx")
+outfile_rapport <- file.path(dir_citizen_stats_output, "craywatch_citizenscience_rapport.docx")
 
 print(doc_report, target = outfile_rapport)
 message(paste("Klaar! Rapport opgeslagen in:", outfile_rapport))

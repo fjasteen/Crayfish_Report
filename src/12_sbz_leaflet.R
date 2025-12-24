@@ -35,8 +35,8 @@ library(dplyr)
 library(tidyr)
 library(htmltools) 
 
-# Laad de basisdata en lagen via script 05
-if(!exists("CF_long")) source("./src/05_load_aq_sbz.R")
+# Laad de basisdata en lagen via script 08
+if(!exists("CF_long")) source("./src/08_load_aq_sbz.R")
 
 message("--- Start genereren Integrale Leaflet Kaart (Versie: Auto-Context Switch) ---")
 

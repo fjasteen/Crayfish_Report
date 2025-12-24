@@ -69,7 +69,7 @@ invisible(lapply(required_dirs, function(x) {
 
 ## ---------- Bestanden: input ----------
 # Ruwe data
-file_craywatch_validated <- file.path(dir_data_input, "craywatch_data.csv") # 10.5281/zenodo.17639074
+file_craywatch_validated <- file.path(dir_data_input, "craywatch", "craywatch_data.csv") # 10.5281/zenodo.17639074
 file_localities_map      <- file.path(dir_craywatch_assets, "localities.csv")
 
 # Shapefiles 

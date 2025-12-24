@@ -157,7 +157,7 @@ for(col in safe_species_cols) {
 }
 
 # --- 6. Opslaan ---
-outfile_doc <- file.path(dir_data_output, "deelbekken_table_matrix.docx")
+outfile_doc <- file.path(dir_maps_output, "deelbekken", "deelbekken_table_matrix.docx")
 
 doc <- read_docx() %>%
   body_add_fpar(fpar(ftext("Tabel: Aanwezigheid per deelbekken", prop = fp_text(bold = TRUE, font.size = 12)))) %>%

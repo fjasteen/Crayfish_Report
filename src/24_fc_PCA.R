@@ -190,7 +190,7 @@ fc_scores_totaal <- bind_rows(fc_scores, soort_scores)
 # als je minder variabelen wil plotten met pijlen moet je gewoon de fc_scores tabel reduceren
 
 # Faxonius limosus
-plot_pca <- ggplot(ordinated_data_clean_no_NA , aes(x = PC1, y = PC2)) +
+plot_pca_lim <- ggplot(ordinated_data_clean_no_NA , aes(x = PC1, y = PC2)) +
   geom_point(aes(color = `faxonius limosus`), size = 3) + # shape = type_observed
   labs(color = "Aanwezigheid gevlekte\nAmerikaanse rivierkreeft") +
   scale_color_manual(values = c("Afwezig" = "lightblue", "Aanwezig" = "darkmagenta"
@@ -213,7 +213,12 @@ plot_pca <- ggplot(ordinated_data_clean_no_NA , aes(x = PC1, y = PC2)) +
   ylab(paste0("PCA2 (",round(var_exp[2]*100,2),"%)"))
 
 
-plot_pca
+plot_pca_lim
+
+# Opslaan Limosus
+file_out_lim <- file.path(dir_data_output, "fysicochemie", "PCA", "pca_biplot_limosus.png")
+ggsave(file_out_lim, plot_pca_lim, width = 10, height = 8, dpi = 300)
+message(paste("Opgeslagen:", file_out_lim))
 
 # Soortpijl berekenen (Procambarus clarkii)
 # We gebruiken de binaire kolom direct uit FC_data
@@ -246,7 +251,7 @@ soort_scores_PC <- soort_scores_PC %>%
 fc_scores_totaal_PC <- bind_rows(fc_scores, soort_scores_PC)
 
 # Procambarus clarkii
-plot_pca <- ggplot(ordinated_data_PC_clean_no_NA , aes(x = PC1, y = PC2)) +
+plot_pca_clarkii <- ggplot(ordinated_data_PC_clean_no_NA , aes(x = PC1, y = PC2)) +
   geom_point(aes(color = `procambarus clarkii`), size = 3) + # shape = type_observed
   labs(color = "Aanwezigheid rode\nAmerikaanse rivierkreeft") +
   scale_color_manual(values = c("Afwezig" = "lightblue", "Aanwezig" = "darkmagenta"
@@ -269,7 +274,11 @@ plot_pca <- ggplot(ordinated_data_PC_clean_no_NA , aes(x = PC1, y = PC2)) +
   ylab(paste0("PCA2 (",round(var_exp[2]*100,2),"%)"))
 
 
-plot_pca
+file_out_clarkii <- file.path(dir_data_output, "fysicochemie", "PCA", "pca_biplot_clarkii.png")
+ggsave(file_out_clarkii, plot_pca_clarkii, width = 10, height = 8, dpi = 300)
+message(paste("Opgeslagen:", file_out_clarkii))
+
+plot_pca_clarkii
 
 # # CPUE Procambarus clarkii
 # plot_pca <- ggplot(ordinated_data_cpue_PC , aes(x = PC1, y = PC2)) +

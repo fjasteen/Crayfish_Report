@@ -212,4 +212,9 @@ p_vangstsucces <- ggplot(data_vangstsucces, aes(x = dutch_name, y = percentage, 
 print(p_vangstsucces)
 ggsave(file_plot_water_vangstsucces, p_vangstsucces, width=10, height=6)
 
+# Definieer het pad (moet overeenkomen met wat Script 15 verwacht)
+file_inter_watertype <- file.path(dir_data_intermediate, "cray_long_watertype.rds")
 
+# Sla de data op
+saveRDS(cray_long, file_inter_watertype)
+message(paste("Dataframe 'cray_long' opgeslagen in:", file_inter_watertype))

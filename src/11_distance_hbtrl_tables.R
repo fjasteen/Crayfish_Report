@@ -24,7 +24,7 @@ library(flextable)
 library(officer)
 
 # Laad de basisdata (zorgt dat 'hbtrl' en 'CF_presence' beschikbaar zijn)
-source("./src/05_load_aq_sbz.R")
+source("./src/08_load_aq_sbz.R")
 
 message("--- Start Ruimtelijke Analyse (Volledige HBTRL) ---")
 

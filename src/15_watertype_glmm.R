@@ -22,15 +22,15 @@ library(car)    # Voor Type III Anova
 
 # Pad naar de tussenliggende file (deze wordt aangemaakt in script 10)
 file_inter_watertype <- file.path(dir_data_intermediate, "cray_long_watertype.rds")
-script_source_10     <- "./src/10_watertype_plot.R" # Pas pad aan indien nodig
+script_source_14     <- "./src/14_watertype_plot.R" # Pas pad aan indien nodig
 
 if (!file.exists(file_inter_watertype)) {
-  message("Verwerkte data (RDS) niet gevonden. Script 10 wordt uitgevoerd om deze aan te maken...")
+  message("Verwerkte data (RDS) niet gevonden. Script 14 wordt uitgevoerd om deze aan te maken...")
   
-  if(file.exists(script_source_10)) {
-    source(script_source_10)
+  if(file.exists(script_source_14)) {
+    source(script_source_14)
   } else {
-    stop(paste("Kan Script 10 niet vinden op:", script_source_10))
+    stop(paste("Kan Script 14 niet vinden op:", script_source_14))
   }
 }
 

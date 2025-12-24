@@ -14,8 +14,6 @@ source("./src/config.R")
 library(ggspatial) 
 
 required_species <- tolower(gbif_species)
-dir_cw_maps <- file.path(dir_data_output, "craywatch_maps")
-if(!dir.exists(dir_cw_maps)) dir.create(dir_cw_maps, recursive = TRUE)
 
 # --- 1. Data Inlezen ---
 if (!file.exists(file_analyse_dataset_rapport)) stop("Run eerst script 03!")
@@ -67,7 +65,7 @@ p_totaal <- get_baseplot() +
   guides(color = guide_legend(override.aes = list(size = 3), ncol = 2))
 
 ggsave(file.path(dir_maps_craywatch, "craywatch_map.png"), p_totaal, width = 15, height = 8, units = "cm", dpi = 400)
-
+message("Klaar! Kaarten opgeslagen in: ", dir_maps_craywatch)
 
 # --- Map navigatable and cat1 non navigatable watercourses ---
 message("Genereren catc_map...")
@@ -103,4 +101,4 @@ p_catc <- ggplot() +
 
 ggsave(file.path(dir_maps_catc, "catc_map.png"), p_catc, width = 15, height = 8, units = "cm", dpi = 400)
 
-message("Klaar! Kaarten opgeslagen in: ", dir_cw_maps)
+message("Klaar! Kaarten opgeslagen in: ", dir_maps_catc)

@@ -193,7 +193,7 @@ data_fc_wvlc_notAvg <- data%>%
   dplyr::filter(!is.na(WVLC))%>%
   inner_join(fc_locations_data%>%
                dplyr::filter(!is.na(WVLC))%>%
-              st_drop_geometry,by=c("WVLC"="WVLC","yearGroup"="Year"), suffix=c("","fc"))%>%
+              st_drop_geometry,by=c("WVLC"="WVLC","yearGroup"="Year"), suffix=c("","fc"), relationship = "many-to-many")%>%
     mutate(distance_cray_FC=st_distance(., fc_locations_data[entryID, ],
                                         by_element = TRUE),
            distance_cray_FC=as.numeric(distance_cray_FC))
