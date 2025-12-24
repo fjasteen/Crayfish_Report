@@ -11,7 +11,6 @@
 
 # --- 0. Instellingen laden ---
 source("./src/config.R")
-library(ggpattern) 
 
 # --- 1. Data inlezen ---
 if (!file.exists(file_analyse_dataset_rapport)) stop("Run eerst script 03!")

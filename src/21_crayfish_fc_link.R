@@ -12,10 +12,6 @@
 source("./src/config.R")
 
 library(qgisprocess)
-library(purrr)
-library(sf)
-library(dplyr)
-library(here)
 library(mapview)
 
 # --- 1. Data laden ---
@@ -146,7 +142,7 @@ dist_end_point <- function(x, data_point = data, polyline = waterloop_merge){
 }
 
 # Definieer output path
-output_file <- here("data", "intermediate", "analysis_dataset_vhag2.Rdata")
+output_file <- here("data", "intermediate", "fysicochemie", "analysis_dataset_vhag2.Rdata")
 
 # voer de functie uit als het bestand nog niet bestaat
 if (file.exists(file_inter_vhag2)) {
@@ -338,7 +334,7 @@ data_fc_cray_notAvg <- data_fc_wvlc_notAvg_all%>%
   dplyr::filter(!is.na(MaandNr))%>%
   st_drop_geometry()
 
-write.table(data_fc_cray_notAvg,file=here("data","intermediate","data_fc_cray_notAvg.txt"),sep="\t",row.names=F)
+write.table(data_fc_cray_notAvg,file=here("data","intermediate","fysicochemie","data_fc_cray_notAvg.txt"),sep="\t",row.names=F)
 
 # filter op zomermaanden fc data per locatie
 data_fc_cray_notAvg_zomer <- data_fc_wvlc_notAvg%>%
@@ -351,7 +347,7 @@ data_fc_cray_notAvg_zomer <- data_fc_wvlc_notAvg%>%
   dplyr::filter(MaandNr%in%5:10)%>%
   st_drop_geometry()
 
-write.table(data_fc_cray_notAvg_zomer,file=here("data","intermediate","data_fc_cray_notAvg_summer.txt"),sep="\t",row.names=F)
+write.table(data_fc_cray_notAvg_zomer,file=here("data","intermediate", "fysicochemie","data_fc_cray_notAvg_summer.txt"),sep="\t",row.names=F)
 
 
 # bereken mediaan mei:oktober metingen
@@ -375,7 +371,7 @@ data_fc_cray <- data_fc_cray_notAvg_zomer%>%
 
 
 
-write.table(data_fc_cray,file=here("data","intermediate","data_fc_cray_analysis.txt"),sep="\t",row.names=F)
+write.table(data_fc_cray,file=here("data","intermediate", "fysicochemie", "data_fc_cray_analysis.txt"),sep="\t",row.names=F)
 
 
 

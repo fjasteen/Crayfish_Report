@@ -6,11 +6,7 @@
 
 # --- 0. Setup ---
 source("./src/config.R")
-library(lwgeom) 
-library(purrr)
-library(mapview)
-library(tidyverse)
-library(sf)
+
 
 # --- 1. Data laden ---
 message("Laden kreeftendata en referentielagen...")

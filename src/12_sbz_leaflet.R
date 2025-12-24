@@ -11,43 +11,37 @@
 # 1. Dataverwerking:
 #    - Koppelt waarnemingen ruimtelijk aan beschermde gebieden (SBZ-H & SBP)
 #    - Berekent "wolken" (populatieclusters) rond waarnemingen om onzekerheid weer te geven
-#    - Bepaalt status per wolk: "In gebied", "Nabij (<1km)" of "Overig"
+#    - Bepaalt status per wolk: "In gebied", "Nabij (<1km)" of "Op afstand"
 #    - Sorteert polygonen op grootte zodat kleine gebieden zichtbaar blijven boven grote
 #
 # 2. User Interface:
-#    - implementeert een Custom HTML/JS controlepaneel voor hiërarchische selectie,
-#      noodzakelijk om hiërarchische selectie mogelijk te maken
-#      a. type analyse (Habitatrichtlijn vs. SBP)
-#      b. resultaten voor een specifieke soort
+#    - implementeert een Custom HTML/JS controlepaneel voor hiërarchische selectie
 #
 # 3. Visualisatie:
-#    - consistente kleurcodering per soort
-#    - Visueel onderscheid tussen aanwezigheid (polygonen) en nulvangsten (stippen)
-#    - Polygonen (aanwezigheden) zijn gekleurd volgens status
+#    - Consistente kleurcodering per soort (voor de vulling)
+#    - Randkleur geeft status aan (Rood/Oranje/Blauw)
+#    - Uitgebreide legende inclusief achtergrondlagen
 # ====================================================
 
 # --- 0. Instellingen & Data laden ---
 source("./src/config.R")
-library(sf)
 library(leaflet)
 library(htmlwidgets)
-library(dplyr)
-library(tidyr)
 library(htmltools) 
 
 # Laad de basisdata en lagen via script 08
 if(!exists("CF_long")) source("./src/08_load_aq_sbz.R")
 
-message("--- Start genereren Integrale Leaflet Kaart (Versie: Auto-Context Switch) ---")
+message("--- Start genereren Integrale Leaflet Kaart ---")
 
-# --- 1. Data voorbereiden: echte afwezigheden (Craywatch 12 absences ) ---
+# --- 1. Data voorbereiden: echte afwezigheden ---
 message("Verwerken van afwezigheden...")
 
 CF_absence_sf <- CF_long %>%
   filter(presence == 0) %>%
   st_as_sf(coords = c("longitude", "latitude"), crs = 4326)
 
-# --- 2. Data voorbereiden:  ---
+# --- 2. Data voorbereiden: Analyse-lagen ---
 message("Creëren van Analyse-lagen...")
 
 ensure_multipolygon <- function(sf_object) {
@@ -74,7 +68,7 @@ if(nrow(sbp_vissen) > 0) {
   sbp_vissen_calc <- sbp_vissen
 }
 
-# Unions
+# Unions (voor snelle ruimtelijke checks)
 if(nrow(hbtrl_calc) > 0) { union_hbtrl <- st_union(st_geometry(hbtrl_calc)) } else { union_hbtrl <- st_polygon() }
 
 geoms_sbp <- list()
@@ -103,7 +97,7 @@ calculate_cloud_status <- function(points, reference_geom, layer_name) {
   # C. Analyse
   if(st_is_empty(reference_geom)) {
     clouds <- clouds %>% 
-      mutate(analysis_layer = layer_name, status = "Overig", border_color = NA_character_) %>% 
+      mutate(analysis_layer = layer_name, status = "Op afstand", border_color = "magenta") %>% 
       st_transform(4326)
     return(clouds)
   }
@@ -121,25 +115,25 @@ calculate_cloud_status <- function(points, reference_geom, layer_name) {
     if(length(dist_matrix) > 0) { is_nearby[idx_not_inside] <- dist_matrix[,1] }
   }
   
-  # 3. Attributen
+  # 3. Attributen toekennen
   clouds %>%
     mutate(
       analysis_layer = layer_name,
       status = case_when(
         is_inside ~ paste("In", layer_name),
         is_nearby ~ paste("Nabij", layer_name, "(<1km)"),
-        TRUE ~ "Overig"
+        TRUE ~ "Op afstand"
       ),
       border_color = case_when(
         is_inside ~ "red",
         is_nearby ~ "orange",
-        TRUE ~ NA_character_ 
+        TRUE ~ "magenta" 
       )
     ) %>%
     st_transform(4326)
 }
 
-# --- 4. Berekenen van populatieclusters, i.e. zgn 'wolken' door buffer 100m ---
+# --- 4. Berekenen van populatieclusters ---
 message("Berekenen wolken...")
 clouds_hbtrl_list <- list()
 clouds_sbp_list   <- list()
@@ -157,7 +151,6 @@ for (sp in unique_species) {
   # ANALYSE A: SBZ-H
   res_hbtrl <- calculate_cloud_status(sp_points, union_hbtrl, "SBZ-H")
   if(!is.null(res_hbtrl)) {
-    res_hbtrl$border_color[is.na(res_hbtrl$border_color)] <- sp_color
     res_hbtrl$fill_color <- sp_color
     clouds_hbtrl_list[[sp]] <- res_hbtrl
   }
@@ -165,7 +158,6 @@ for (sp in unique_species) {
   # ANALYSE B: SBP
   res_sbp <- calculate_cloud_status(sp_points, union_sbp, "SBP")
   if(!is.null(res_sbp)) {
-    res_sbp$border_color[is.na(res_sbp$border_color)] <- sp_color
     res_sbp$fill_color <- sp_color
     clouds_sbp_list[[sp]] <- res_sbp
   }
@@ -177,7 +169,7 @@ message("Kaart opbouwen...")
 map <- leaflet() %>%
   addProviderTiles(providers$CartoDB.Positron) 
 
-# --- A. Contextlagen sbz---
+# --- A. Contextlagen ---
 # Pas op! De group names moeten exact matchen met wat we in JS gebruiken.
 grp_context_hbtrl <- "Context: Habitatrichtlijn"
 grp_context_sbp   <- "Context: SBP"
@@ -200,7 +192,7 @@ map <- map %>%
   addPolygons(
     data = sbp_pgs_calc %>% 
       mutate(area = st_area(.)) %>% 
-      arrange(desc(area)) %>%  #grootste polygonen onderaan
+      arrange(desc(area)) %>%  # grootste polygonen onderaan
       st_transform(4326),
     color = "blue", weight = 1.0, fillColor = "blue", fillOpacity = 0.2,
     group = grp_context_sbp,
@@ -278,8 +270,7 @@ for (i in seq_along(unique_species)) {
   }
 }
 
-
-# --- D. HTML controlepanel om hiërarchische selectie toe te laten  ---
+# --- D. HTML controlepanel (Custom JS)  ---
 custom_panel_html <- paste0(
   '<div id="custom-analysis-control" style="background: white; padding: 10px; border-radius: 5px; border: 1px solid #ccc; font-size: 12px; min-width: 220px;">',
   
@@ -295,7 +286,7 @@ custom_panel_html <- paste0(
   '</div>'
 )
 
-# Uitgebreide JavaScript logica om contextlagen te togglen (en mutueel exclusief)
+# JavaScript logica om contextlagen te togglen
 map <- map %>%
   addControl(html = custom_panel_html, position = "bottomright") %>%
   htmlwidgets::onRender(
@@ -306,7 +297,7 @@ map <- map %>%
       // Hulpfunctie: Zet zichtbaarheid van een laag
       function setLayerVisibility(layer, isVisible) {
           if (isVisible) {
-             // Zichtbaar maken (display resetten)
+             // Zichtbaar maken
              if(layer.getElement) { var e = layer.getElement(); if(e) e.style.display = ''; }
              if(layer._path) layer._path.style.display = '';
              
@@ -334,7 +325,6 @@ map <- map %>%
             var g = layer.options.group;
             
             // 1. LOGICA VOOR CONTEXTLAGEN 
-            // Als Analyse = SBZ, toon Habitatrichtlijn. Als Analyse = SBP, toon SBP.
             if (g === 'Context: Habitatrichtlijn') {
                 setLayerVisibility(layer, (analysis === 'SBZ'));
             }
@@ -343,7 +333,6 @@ map <- map %>%
             }
             
             // 2. LOGICA VOOR RESULTATEN 
-            // Toon alleen de lagen die matchen met 'Analyse_Soort'
             else if (g.startsWith('SBZ_') || g.startsWith('SBP_')) {
               if (g === targetSpeciesGroup) {
                  setLayerVisibility(layer, true);
@@ -376,10 +365,15 @@ map <- map %>%
       "<b>Populatiestatus (Randkleur)</b><br>",
       "<i style='background:white; border: 2px solid red; width: 12px; height: 12px; display: inline-block;'></i> In gebied<br>",
       "<i style='background:white; border: 2px solid orange; width: 12px; height: 12px; display: inline-block;'></i> Nabij (<1km)<br>",
-      "<i style='background:white; border: 2px solid grey; width: 12px; height: 12px; display: inline-block;'></i> Overig<br>",
+      "<i style='background:white; border: 2px solid magenta; width: 12px; height: 12px; display: inline-block;'></i> Op afstand<br>",
       "<hr style='margin:5px 0;'>",
       "<b>Afwezigheden</b><br>",
       "<i style='background:white; border: 1px solid black; border-radius: 50%; width: 8px; height: 8px; display: inline-block;'></i> Nulvangst<br>",
+      "<hr style='margin:5px 0;'>",
+      "<b>Gebieden & Habitats</b><br>",
+      "<i style='background:white; border: 2px solid darkgreen; width: 12px; height: 12px; display: inline-block;'></i> Habitatrichtlijngebied<br>",
+      "<i style='background:lightgreen; opacity:0.6; width: 12px; height: 12px; display: inline-block;'></i> Aquatische habitattypes (BWK)<br>",
+      "<i style='background:blue; opacity:0.4; width: 12px; height: 12px; display: inline-block;'></i> Soortenbeschermingsprogramma (SBP)<br>",
       "</div>"
     ),
     position = "bottomleft"

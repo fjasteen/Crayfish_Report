@@ -9,7 +9,6 @@
 # --- 0. Instellingen laden ---
 source("./src/config.R")
 library(tidyverse)
-library(sf)
 library(officer)
 library(flextable)
 

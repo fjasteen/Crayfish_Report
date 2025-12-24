@@ -6,7 +6,8 @@
 # - Laadt en verwerkt de kreeftendata (CF_presence)
 # - Transformeert alles naar crs lambert
 # ====================================================
-
+source("./src/config.R")
+       
 # We gaan ervan uit dat config.R al geladen is door het moederscript
 if (!exists("file_n2000_habitats")) {
   stop("Configuratie niet geladen. Run eerst source('./src/config.R')")
@@ -49,14 +50,72 @@ if (!exists("sbp_pgs_aq")) {
     mutate(habitat_id = row_number())
 }
 
+# B. SBP Vissen (Lijnen) + DEBUG Naamkoppeling
+# B. SBP Vissen (Lijnen) + Naamkoppeling
 if (!exists("sbp_vissen")) {
   message("Laden SBP (Vissen)...")
   sbp_vissen <- st_read(url_sbp_pls, quiet = TRUE)
-  if (is.na(st_crs(sbp_vissen))) st_crs(sbp_vissen) <- crs_lambert
   
-  sbp_vissen <- sbp_vissen %>%
-    st_transform(crs_lambert) %>%
+  if (is.na(st_crs(sbp_vissen))) st_crs(sbp_vissen) <- crs_lambert
+  sbp_vissen <- st_transform(sbp_vissen, crs_lambert) %>%
     mutate(habitat_id = row_number())
+  
+  message("  > Start koppeling waterloopnamen...")
+  
+  if (file.exists(file_waterloopsegmenten)) {
+    vha_ref <- st_read(file_waterloopsegmenten, quiet = TRUE) %>%
+      st_transform(crs_lambert) %>%
+      filter(!is.na(NAAM) & NAAM != "") %>%
+      select(NAAM) 
+    
+    if (nrow(vha_ref) > 0 && nrow(sbp_vissen) > 0) {
+      
+      # Nearest Feature matching
+      nearest_idx <- st_nearest_feature(sbp_vissen, vha_ref)
+      matched_vha <- vha_ref[nearest_idx, ]
+      dists <- st_distance(sbp_vissen, matched_vha, by_element = TRUE)
+      
+      sbp_vissen <- sbp_vissen %>%
+        mutate(
+          temp_naam = matched_vha$NAAM,
+          match_afstand_m = as.numeric(dists) 
+        )
+      
+      # Debug output naar console
+      message("\n  --- MATCHING STATISTIEKEN ---")
+      message(paste("  Aantal lijnen:", nrow(sbp_vissen)))
+      message("  Afstand tot waterloop (min / mediaan / max):")
+      print(summary(sbp_vissen$match_afstand_m))
+      
+      bad_matches <- sbp_vissen %>% 
+        st_drop_geometry() %>%
+        arrange(desc(match_afstand_m)) %>%
+        select(gebied, temp_naam, match_afstand_m) %>%
+        head(5)
+      
+      message("\n  Top 5 grootste afstanden:")
+      print(bad_matches)
+      message("  ---------------------------------\n")
+      
+      # Definitieve toewijzing (zonder haakjes)
+      sbp_vissen <- sbp_vissen %>%
+        mutate(
+          waterloop_naam = temp_naam,
+          gebied = case_when(
+            !is.na(waterloop_naam) ~ paste0(gebied, " ", waterloop_naam),
+            TRUE ~ gebied
+          )
+        ) %>%
+        select(-temp_naam) 
+      
+      message(paste("  > Klaar. Alle gebieden voorzien van waterloopnaam."))
+      
+    } else {
+      message("  ! Waarschuwing: Referentielaag of SBP laag is leeg.")
+    }
+  } else {
+    message("  ! Fout: Bestand niet gevonden: ", file_waterloopsegmenten)
+  }
 }
 
 # 4. Kreeftendata (analysedataset)

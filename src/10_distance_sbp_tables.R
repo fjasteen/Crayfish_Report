@@ -16,8 +16,6 @@
 
 # --- 0. Instellingen & Data laden ---
 source("./src/config.R")
-library(flextable)
-library(officer)
 
 # Laad de basisdata 
 source("./src/08_load_aq_sbz.R")

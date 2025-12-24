@@ -14,11 +14,6 @@
 # --- 0. Instellingen laden ---
 source("./src/config.R")
 
-library(lme4)   # Voor GLMM
-library(DHARMa)
-library(emmeans)
-library(car) # Voor Type III Anova
-
 # --- 1. Data Inlezen ---
 if (!file.exists(file_analyse_dataset_rapport)) stop("Run eerst script 03!")
 

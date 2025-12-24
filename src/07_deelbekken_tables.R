@@ -8,8 +8,6 @@
 
 # --- 0. Instellingen laden ---
 source("./src/config.R")
-library(flextable)
-library(officer)
 
 # --- 1. Data inlezen ---
 if (!file.exists(file_analyse_dataset_rapport)) {

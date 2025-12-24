@@ -31,9 +31,6 @@
 
 # Laad het pakket
 library(corrplot)
-library(ggplot2)
-library(dplyr)
-library(tidyr) # Zeker zijn dat deze geladen is voor pivot_longer
 
 # Lees data
 FC_data <- data_fc_cray

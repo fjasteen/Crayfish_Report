@@ -5,6 +5,7 @@
 ## ---------- Libraries  ----------
 required_packages <- c(
   "here",       # Relatieve paden
+  "purrr",
   "sf",         # Ruimtelijke data
   "dplyr",      
   "tidyr",      
@@ -15,7 +16,14 @@ required_packages <- c(
   "leaflet",    # Interactieve kaarten
   "ggplot2",
   "htmltools",
-  "ggpattern"
+  "ggpattern",
+  "htmlwidgets",  # Voor opslaan leaflets (script 06)
+  "RColorBrewer", # Kleurpaletten (script 06)
+  "rlang",        # Programmeer tools (script 05, 06)
+  "lwgeom",       # Ruimtelijke berekeningen (script 04)
+  "mapview",      # Interactieve kaarten (script 04)
+  "flextable",    # Tabellen opmaak (script 07, 10)
+  "officer"       # Word export (script 07, 10)
 )
 
 
@@ -51,7 +59,7 @@ dir_maps_output <- file.path(dir_data_output, "maps")
 dir_maps_cpue   <- file.path(dir_data_output, "maps", "cpue")
 dir_maps_craywatch <- file.path(dir_maps_output, "craywatch")
 dir_maps_catc      <- file.path(dir_maps_output, "catc")
-
+dir_maps_deelbekken <- file.path(dir_maps_output, "deelbekken")
 
 
 required_dirs <- c(
@@ -59,7 +67,7 @@ required_dirs <- c(
   dir_gbif_input, dir_gbif_intermediate, dir_shapefiles,
   dir_craywatch_output, dir_urbanisation_output, dir_watertype_output,
   dir_maps_output, dir_maps_cpue, dir_gridcell_output, dir_citizen_stats_output, 
-  dir_maps_craywatch, dir_maps_catc, dir_trends_output
+  dir_maps_craywatch, dir_maps_catc, dir_trends_output, dir_maps_deelbekken
 )
 
 invisible(lapply(required_dirs, function(x) {
@@ -85,6 +93,7 @@ file_waterloopsegmenten <- file.path(dir_shapefiles, "VHA_waterlopen_VHA_waterlo
 file_n2000_habitats <- file.path(dir_shapefiles, "BwkHab.shp") # natura2000
 file_3260_habitats  <- file.path(dir_shapefiles, "Hab3260.shp") #Ranunculoides hab 3260
 
+# Shapefiles gebruikt ter projectie in kaarten
 file_hoofdrivieren  <- file.path(dir_shapefiles, "hoofdrivieren.shp") # rivieren
 file_kanalen        <- file.path(dir_shapefiles, "kanalen.shp") # kanalen
 file_gemeenten      <- file.path(dir_shapefiles, "gemeenten.shp") # gemeentegrenzen
@@ -95,8 +104,8 @@ file_urban_map <- file.path(dir_shapefiles, "verstedelijking.gpkg")
 
 ## ---------- Bestanden: Intermediate (RDS) ----------
 file_inter_craywatch_clean <- file.path(dir_data_intermediate, "craywatch_clean.rds")
-file_inter_gbif_processed  <- file.path(dir_data_intermediate, "gbif_processed.rds")
-file_inter_vhag2           <- file.path(dir_data_intermediate, "analysis_dataset_vhag2.Rdata")
+file_inter_gbif_processed  <- file.path(dir_data_intermediate, "gbif", "gbif_processed.rds")
+file_inter_vhag2           <- file.path(dir_data_intermediate, "fysicochemie", "analysis_dataset_vhag2.Rdata")
 file_fc_locations_data     <- file.path(dir_data_intermediate, "fysicochemie", "fc_locations_data.Rdata")
 file_fc_locations_validated<- file.path(dir_data_intermediate, "fysicochemie", "fc_locations_validated.Rdata")
 

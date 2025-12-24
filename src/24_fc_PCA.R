@@ -30,12 +30,9 @@
 # ============================================================
 
 library(vegan)
-library(dplyr)
-library(ggplot2)
 library(tibble)
 library(missMDA)
 library(mapview)
-library(sf)
 library(ggrepel)
 
 # Lees data in 

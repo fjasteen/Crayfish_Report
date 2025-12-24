@@ -8,15 +8,32 @@
 
 # --- 0. Instellingen laden ---
 source("./src/config.R")
-library(rlang)   
 
 # --- 1. Data inlezen ---
 
+# A. Analyse dataset laden
 # A. Analyse dataset laden
 if (!file.exists(file_analyse_dataset_rapport)) {
   stop("Analyse dataset niet gevonden. Draai eerst script 03.")
 }
 df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
+
+# --- AUTO-FIX: Check of VHAG bestaat (Script 04) ---
+if (!"VHAG" %in% names(df_analyse)) {
+  message("Kolom 'VHAG' ontbreekt (Script 04 is nog niet gedraaid).")
+  message("Script 04 wordt nu uitgevoerd om de ruimtelijke koppeling te maken...")
+  
+  script_04 <- "./04_link_vhag-wvlc.R" 
+  
+  if(file.exists(script_04)) {
+    source(script_04)
+    df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
+    message("✅ Data ververst. Analyse gaat verder...")
+    
+  } else {
+    stop(paste("Kan script 04 niet vinden op:", script_04))
+  }
+}
 
 # B. Kaartlagen voorbereiden
 message("Kaartlagen laden...")
@@ -37,10 +54,6 @@ vlaanderen_sf <- base_map$layers[[1]]$data
 target_crs <- 31370
 deelbekkens_sf <- st_transform(deelbekkens_sf, target_crs)
 
-# Map voor output
-dir_maps <- file.path(dir_data_output, "maps", "deelbekken")
-if (!dir.exists(dir_maps)) dir.create(dir_maps, recursive = TRUE)
-
 # --- 2. Loop over elke soort ---
 message("Start genereren van kaarten...")
 
@@ -60,7 +73,8 @@ for (species_name in gbif_species) {
     mutate(
       has_vhag   = !is.na(VHAG),
       point_type = if_else(has_vhag, "open systeem", "gesloten systeem - niet gekoppeld")
-    )
+    ) %>%
+  arrange(has_vhag) #rode bollen vanboven
   
   n_obs <- nrow(df_sp)
   
@@ -151,9 +165,9 @@ for (species_name in gbif_species) {
   
   # --- 6. opslaan ---
   file_name <- paste0("map_", gsub(" ", "_", species_name), "_deelbekken.jpg")
-  output_path <- file.path(dir_maps, file_name)
+  output_path <- file.path(dir_maps_deelbekken, file_name)
   
   ggsave(output_path, plot = p, width = 10, height = 8, dpi = 300)
 }
 
-message("Klaar! JPG kaarten opgeslagen in: ", dir_maps)
+message("Klaar! JPG kaarten opgeslagen in: ", dir_maps_deelbekken)

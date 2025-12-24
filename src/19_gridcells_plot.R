@@ -10,8 +10,6 @@
 # ====================================================
 
 source("./src/config.R")
-if (!requireNamespace("ggpattern", quietly = TRUE)) install.packages("ggpattern")
-library(ggpattern)
 
 # --- 1. Data Inlezen & Filteren ---
 if (!file.exists(file_analyse_dataset_rapport)) stop("Run eerst script 03!")
