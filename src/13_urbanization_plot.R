@@ -17,9 +17,7 @@ source("./src/config.R")
 # A. laad analyse dataset
 if (!file.exists(file_analyse_dataset_rapport)) stop("Run eerst script 03!")
 
-df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE) #%>%
-  # filter op gekoppelde data voor consistentie (niet nodig)
-  #filter(!is.na(VHAG) | !is.na(WVLC))
+df_analyse <- read_csv(file_analyse_dataset_rapport, show_col_types = FALSE)
 
 # B. Verstedelijking shapefile
 file_urban_map <- file.path(dir_shapefiles, "verstedelijking.gpkg") 
@@ -61,15 +59,20 @@ cray_long <- cray_urban %>%
   filter(!is.na(presence))
 
 # ==============================================================================
-# 4. VISUALISATIES
+# 4. VISUALISATIES (GEOPTIMALISEERD VOOR RAPPORTAGE)
 # ==============================================================================
 
+# Instellingen voor tekstgroottes (uniform met andere scripts)
+font_base <- 30
+font_axis_labels <- 26
+font_axis_titles <- 30
+font_legend <- 28
+font_geom_text <- 11
+
 # ------------------------------------------------------------------------------
-# Plot frequentie per type verstedelijking
-# Data = GBIF + Craywatch
+# Plot 1: Frequentie per type verstedelijking
 # ------------------------------------------------------------------------------
 
-# 1. Data voorbereiden 
 data_distributie <- cray_long %>%
   filter(presence == 1) %>% 
   group_by(species, type_urban) %>%
@@ -80,42 +83,43 @@ data_distributie <- cray_long %>%
   ungroup() %>%
   mutate(dutch_name = factor(species_labels_dutch[species], levels = species_labels_dutch))
 
-# 2. Plotten 
 p_distributie <- ggplot(data_distributie, aes(x = dutch_name, y = percentage, fill = type_urban)) +
-  geom_bar(stat = "identity", position = "stack", width = 0.7) +
+  geom_bar(stat = "identity", position = "stack", width = 0.7, color = "black", linewidth = 0.6) +
   geom_text(
     aes(label = ifelse(n > 0, n, "")), 
     position = position_stack(vjust = 0.5), 
-    size = 2.5,
-    color = "white",
-    fontface = "bold"
+    size = font_geom_text, color = "white", fontface = "bold"
   ) +
-  
   scale_fill_manual(values = urban_colors) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 15)) +
-  scale_y_continuous(limits = c(0, 101), expand = expansion(mult = c(0, 0))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + 
+  scale_y_continuous(limits = c(0, 101), expand = expansion(mult = c(0, 0.2))) +
   labs(
     title = "Relatieve frequentie van de waarnemingen",
     subtitle = "per type verstedelijking en soort",
     y = "Percentage van de waarnemingen (%)",
     x = "", fill = ""
   ) +
-  theme_minimal() + 
+  theme_minimal(base_size = font_base) + 
   theme(
     legend.position = "bottom",
-    panel.grid.major.x = element_blank(), 
-    panel.grid.minor = element_blank(),
-    axis.line.x = element_line(color = "black")
+    legend.title = element_blank(),
+    legend.text = element_text(size = font_legend),
+    legend.key.size = unit(1.8, "cm"),
+    axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1, lineheight = 0.8, size = font_axis_labels),
+    axis.text.y = element_text(size = font_axis_labels),
+    axis.title.y = element_text(size = font_axis_titles, margin = margin(r = 20)),
+    plot.title = element_text(size = 40, face = "bold", margin = margin(b = 10)),
+    plot.subtitle = element_text(size = 30, margin = margin(b = 30)),
+    panel.grid.major.x = element_blank(),
+    plot.margin = margin(40, 40, 40, 40)
   )
 
-print(p_distributie)
-ggsave(file.path(dir_urbanisation_output, "plot_urban_distributie.png"), p_distributie, width=10, height=6)
+ggsave(file.path(dir_urbanisation_output, "plot_urban_distributie.png"), p_distributie, width = 20, height = 14, bg = "white", dpi = 300)
 
 # ------------------------------------------------------------------------------
-# Plot soorten per type
-# Data = GBIF + Craywatch
-# Als ik in een type verstedelijking vang, welke soort kom ik dan tegen?
+# Plot 2: Soorten per type verstedelijking
 # ------------------------------------------------------------------------------
+
 data_community <- cray_long %>%
   filter(presence == 1) %>%
   group_by(type_urban, species) %>%
@@ -125,31 +129,35 @@ data_community <- cray_long %>%
   mutate(dutch_name = factor(species_labels_dutch[species], levels = species_labels_dutch))
 
 p_community <- ggplot(data_community, aes(x = type_urban, y = percentage, fill = species)) + 
-  geom_bar(stat = "identity", position = "stack") + 
-    scale_fill_manual(
-    values = species_colors,      
-    labels = species_labels_dutch  
-  ) +      
-    labs(
+  geom_bar(stat = "identity", position = "stack", width = 0.7, color = "black", linewidth = 0.6) + 
+  scale_fill_manual(values = species_colors, labels = species_labels_dutch) +      
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  labs(
     title = "Soortensamenstelling per type verstedelijking",
-    subtitle = "",
+    subtitle = "Aandeel van de verschillende soorten binnen de omgeving",
     y = "Aandeel in de gemeenschap (%)",
-    x = "", fill = "Soort"
+    x = "", fill = ""
   ) +
-  theme_minimal() + 
-  theme(legend.position = "right")
+  theme_minimal(base_size = font_base) + 
+  theme(
+    legend.position = "right",
+    legend.text = element_text(size = 22),
+    axis.text.x = element_text(size = font_axis_labels, face = "bold"),
+    axis.text.y = element_text(size = font_axis_labels),
+    axis.title.y = element_text(size = font_axis_titles, margin = margin(r = 20)),
+    plot.title = element_text(size = 40, face = "bold", margin = margin(b = 10)),
+    plot.subtitle = element_text(size = 30, margin = margin(b = 30)),
+    panel.grid.major.x = element_blank(),
+    plot.margin = margin(40, 40, 40, 40)
+  )
 
-print(p_community)
-ggsave(file.path(dir_urbanisation_output, "plot_urban_community.png"), p_community, width=8, height=6)
+ggsave(file.path(dir_urbanisation_output, "plot_urban_community.png"), p_community, width = 22, height = 14, bg = "white", dpi = 300)
 
 
 # ------------------------------------------------------------------------------
-# Plot vangstsucces per type verstedelijking
-# Data = Craywatch (kan enkel indien totaal aantal bemonsteringen wordt in 
-# rekening gebracht)
-# Hoe groot is de pakkans per bemonstering?
+# Plot 3: Vangstsucces per type verstedelijking
 # ------------------------------------------------------------------------------
-# 1. Data voorbereiden
+
 data_vangstsucces <- cray_long %>%
   filter(dat.source == "craywatch_data") %>% 
   filter(!is.na(presence)) %>%
@@ -159,43 +167,45 @@ data_vangstsucces <- cray_long %>%
     percentage = mean(presence) * 100,
     .groups = "drop"
   ) %>%
-  # Filter soorten eruit die overal 0% hebben (Californisch, Turks)
   group_by(species) %>%
-  filter(sum(percentage) > 0) %>% # Behoud alleen als er tenminste ergens iets gevangen is
+  filter(sum(percentage) > 0) %>% 
   ungroup() %>%
   complete(species, type_urban, fill = list(percentage = 0, n_traps = 0)) %>%
-  
-  # Namen toevoegen
   mutate(dutch_name = factor(species_labels_dutch[species], levels = species_labels_dutch))
 
-# 2. Bepaal de maximale waarde voor de Y-as limiet
 max_y <- max(data_vangstsucces$percentage, na.rm = TRUE)
 
-# 3. Plot
 p_vangstsucces <- ggplot(data_vangstsucces, aes(x = dutch_name, y = percentage, fill = type_urban)) +
-  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7) +
-  
-  # label toont percentage 
+  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7, color = "black", linewidth = 0.6) +
   geom_text(
     aes(label = ifelse(percentage > 0, paste0(round(percentage, 1), "%"), "")), 
     position = position_dodge(width = 0.8), 
-    vjust = -0.5, 
-    size = 2.5
+    vjust = -0.7, 
+    size = 9,
+    fontface = "bold"
   ) +
   scale_fill_manual(values = urban_colors) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 15)) +
-  scale_y_continuous(
-    limits = c(0, max_y * 1.1), 
-    expand = expansion(mult = c(0, 0)) 
-  ) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) +
+  scale_y_continuous(limits = c(0, max_y * 1.3), expand = expansion(mult = c(0, 0))) +
   labs(
-    title = "Vangstkans voor een soort per type verstedelijking",
-    subtitle = "op basis van de gestandaardiseerde monitoring",
-    y = "Vangstskans (%)",
+    title = "Vangstkans per type verstedelijking",
+    subtitle = "op basis van de gestandaardiseerde monitoring (Craywatch)",
+    y = "Vangstkans (%)",
     x = "", fill = ""
   ) +
-  theme_minimal() + 
-  theme(legend.position = "bottom")
+  theme_minimal(base_size = font_base) + 
+  theme(
+    legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(size = font_legend),
+    legend.key.size = unit(1.8, "cm"),
+    axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1, lineheight = 0.8, size = font_axis_labels),
+    axis.text.y = element_text(size = font_axis_labels),
+    axis.title.y = element_text(size = font_axis_titles, margin = margin(r = 20)),
+    plot.title = element_text(size = 40, face = "bold", margin = margin(b = 10)),
+    plot.subtitle = element_text(size = 30, margin = margin(b = 30)),
+    panel.grid.major.x = element_blank(),
+    plot.margin = margin(40, 40, 40, 40)
+  )
 
-print(p_vangstsucces)
-ggsave(file.path(dir_urbanisation_output, "plot_urban_vangstsucces.png"), p_vangstsucces, width=10, height=6)
+ggsave(file.path(dir_urbanisation_output, "plot_urban_vangstsucces.png"), p_vangstsucces, width = 20, height = 14, bg = "white", dpi = 300)
