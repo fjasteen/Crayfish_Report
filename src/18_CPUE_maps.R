@@ -1,12 +1,11 @@
 # ====================================================
 # Scriptnaam: 18_cpue_maps_trends.R
-# Auteur: Frédérique Steen 
+# Project: Craywatch
 # Datum: 01-12-2025
 # Beschrijving: 
 # - Maakt verspreidingskaarten met CPUE, absences (Craywatch) 
 # en presences (GBIF)
 # - Berekent trends in bezette km-hokken (pre & post Craywatch)
-# Gebaseerd op: Concepten uit script [CPUE] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---
@@ -29,7 +28,7 @@ vlaanderen_sf <- st_read(file_vlaanderen_grenzen, quiet = TRUE) %>%
 message("Starten met genereren van CPUE kaarten...")
 
 # Loop over elke soort die in de config staat
-for (species_col in required_species) {
+for (species_col in tolower(gbif_species)) {
   
   # Naam voor plot titels/bestanden
   species_name_nl <- species_labels_dutch[species_col]
@@ -78,8 +77,10 @@ for (species_col in required_species) {
       subtitle = NULL
     ) +
       theme(
+      plot.title = element_text(size = 16, face = "bold", hjust = 0),
+      title.position = "left",
       legend.position = "right",
-      legend.title = element_text(face = "bold", size = 10),
+      legend.title = element_text(size = 12),
       legend.key.height = unit(1, "cm")
     )
 

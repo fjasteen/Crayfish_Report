@@ -8,7 +8,6 @@
 # - Plot soorten per watertype 
 # - Plot vangstsucces per watertype  
 # - Statistiek: GLMM
-# Gebaseerd op: Concepten uit script [voorkomen_lentisch_lotisch] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---
@@ -57,10 +56,15 @@ cray_long <- cray_water %>%
 # 3. VISUALISATIES
 # ==============================================================================
 
+# Instellingen voor tekstgroottes (gebaseerd op gridcell_plot stijl)
+font_base <- 30
+font_axis_labels <- 26
+font_axis_titles <- 30
+font_legend <- 28
+font_geom_text <- 11
+
 # ------------------------------------------------------------------------------
 # Plot frequentie per watertype
-# Op basis van het totale aantal waarnemingen, welk % bevindt zich in welk type water?"
-# Data: GBIF + Craywatch (presence == 1)
 # ------------------------------------------------------------------------------
 
 data_distributie <- cray_long %>%
@@ -74,37 +78,42 @@ data_distributie <- cray_long %>%
   mutate(dutch_name = factor(species_labels_dutch[species], levels = species_labels_dutch))
 
 p_distributie <- ggplot(data_distributie, aes(x = dutch_name, y = percentage, fill = water_type)) +
-  geom_bar(stat = "identity", position = "stack", width = 0.7) +
+  geom_bar(stat = "identity", position = "stack", width = 0.7, color = "black", linewidth = 0.6) +
   geom_text(
     aes(label = ifelse(n > 0, n, "")), 
     position = position_stack(vjust = 0.5), 
-    size = 2.5, color = "white", fontface = "bold"
+    size = font_geom_text, color = "white", fontface = "bold"
   ) +
   scale_fill_manual(values = water_colors) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 15)) +
-  scale_y_continuous(limits = c(0, 101), expand = expansion(mult = c(0, 0))) +
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + 
+  scale_y_continuous(limits = c(0, 101), expand = expansion(mult = c(0, 0.2))) +
   labs(
     title = "Relatieve frequentie van de waarnemingen",
     subtitle = "per type systeem en soort",
     y = "Percentage van de populatie (%)",
     x = "", fill = ""
   ) +
-  theme_minimal() + 
+  theme_minimal(base_size = font_base) + 
   theme(
     legend.position = "bottom",
+    legend.title = element_blank(),
+    legend.text = element_text(size = font_legend),
+    legend.key.size = unit(1.8, "cm"),
+    axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1, lineheight = 0.8, size = font_axis_labels),
+    axis.text.y = element_text(size = font_axis_labels),
+    axis.title.y = element_text(size = font_axis_titles, margin = margin(r = 20)),
+    plot.title = element_text(size = 40, face = "bold", margin = margin(b = 10)),
+    plot.subtitle = element_text(size = 30, margin = margin(b = 30)),
     panel.grid.major.x = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.line.x = element_line(color = "black")
+    plot.margin = margin(40, 40, 40, 40)
   )
 
 print(p_distributie)
-ggsave(file_plot_water_distributie, p_distributie, width=10, height=6)
+ggsave(file_plot_water_distributie, p_distributie, width = 20, height = 14, bg = "white", dpi = 300)
 
 
 # ------------------------------------------------------------------------------
 # Plot soorten per type
-# Data = GBIF + Craywatch
-# Als ik in een type systeem vang, welke soort kom ik dan tegen?
 # ------------------------------------------------------------------------------
 
 data_community <- cray_long %>%
@@ -116,100 +125,4 @@ data_community <- cray_long %>%
   mutate(species = factor(species, levels = names(species_labels_dutch)))
 
 p_community <- ggplot(data_community, aes(x = water_type, y = percentage, fill = species)) + 
-  geom_bar(stat = "identity", position = "stack", width = 0.7) + 
-  
-  scale_fill_manual(
-    values = species_colors,      
-    labels = species_labels_dutch  
-  ) +      
-  
-  labs(
-    title = "Soortensamenstelling per watertype",
-    subtitle = "",
-    y = "Aandeel in de gemeenschap (%)",
-    x = "", fill = "Soort"
-  ) +
-  theme_minimal() + 
-  theme(
-    legend.position = "right",
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.line.x = element_line(color = "black")
-  )
-
-print(p_community)
-ggsave(file_plot_water_community, p_community, width=8, height=6)
-
-
-# ------------------------------------------------------------------------------
-# Plot vangstsucces per type systeem
-# Data = Craywatch (deler is totaal aantal succesvolle bemonsteringen, 
-# niet beschikbaar voor GBIF data)
-# Hoe groot is de pakkans per bemonsteringsessie?
-# ------------------------------------------------------------------------------
-
-data_vangstsucces <- cray_long %>%
-  filter(dat.source == "craywatch_data") %>% 
-  filter(!is.na(presence)) %>%
-  group_by(species, water_type) %>%
-  summarise(
-    n_traps = n(),
-    n_succes = sum(presence),   
-    percentage = mean(presence) * 100,
-    .groups = "drop"
-  ) %>%
-  # Filter soorten eruit die nergens gevangen zijn
-  group_by(species) %>%
-  filter(sum(percentage) > 0) %>% 
-  ungroup() %>%
-  
-  # Maak compleet voor vaste balkbreedte
-  complete(species, water_type, fill = list(percentage = 0, n_traps = 0)) %>%
-  mutate(dutch_name = factor(species_labels_dutch[species], levels = species_labels_dutch))
-
-max_y <- max(data_vangstsucces$percentage, na.rm = TRUE)
-
-p_vangstsucces <- ggplot(data_vangstsucces, aes(x = dutch_name, y = percentage, fill = water_type)) +
-  geom_bar(stat = "identity", position = position_dodge(width = 0.8), width = 0.7) +
-  
-  geom_text(
-    aes(
-      label = ifelse(
-        percentage > 0, 
-        paste0(round(percentage, 1), "%\n(", n_succes, ")"), 
-        ""
-      )
-    ), 
-    position = position_dodge(width = 0.8), 
-    vjust = -0.5, 
-    size = 2.5,
-    lineheight = 0.8 
-  ) +
-  
-  scale_fill_manual(values = water_colors) +
-  scale_x_discrete(labels = function(x) str_wrap(x, width = 15)) +
-  scale_y_continuous(limits = c(0, max_y * 1.1), expand = expansion(mult = c(0, 0))) +
-  
-  labs(
-    title = "Vangstkans voor een soort per type systeem",
-    subtitle = "op basis van de gestandaardiseerde monitoring",
-    y = "Vangstkans (%)",
-    x = "", fill = ""
-  ) +
-  theme_minimal() + 
-  theme(
-    legend.position = "bottom",
-    panel.grid.major.x = element_blank(),
-    panel.grid.minor = element_blank(),
-    axis.line.x = element_line(color = "black")
-  )
-
-print(p_vangstsucces)
-ggsave(file_plot_water_vangstsucces, p_vangstsucces, width=10, height=6)
-
-# Definieer het pad (moet overeenkomen met wat Script 15 verwacht)
-file_inter_watertype <- file.path(dir_data_intermediate, "cray_long_watertype.rds")
-
-# Sla de data op
-saveRDS(cray_long, file_inter_watertype)
-message(paste("Dataframe 'cray_long' opgeslagen in:", file_inter_watertype))
+  geom_bar(stat = "identity", position = "

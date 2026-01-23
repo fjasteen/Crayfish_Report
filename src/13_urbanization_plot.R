@@ -1,13 +1,12 @@
 # ====================================================
 # Scriptnaam: 13_urbanisation_plot.R
-# Auteur: Frédérique Steen
+# Project: Craywatch
 # Datum: 01-12-2025
 # Beschrijving: 
 # - Koppelt waarnemingen aan verstedelijkingsgraad
 # - Plot frequentie per type verstedelijking 
 # - Plot soorten per type 
 # - Plot vangstsucces per type verstedelijking 
-# Gebaseerd op: Concepten uit script [voorkomen_urbanisatie] van M. Vermeylen
 # ====================================================
 
 # --- 0. Instellingen laden ---

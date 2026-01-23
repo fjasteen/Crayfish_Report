@@ -6,7 +6,7 @@
 # - Filtert soorten zonder historie of expansie
 # - Sorteert op totaal aantal (meeste links)
 # - FIX: Robuuste arcering
-# Gebaseerd op: Concepten uit script [stats] van M. Vermeylen
+# Project: Craywatch
 # ====================================================
 
 source("./src/config.R")
@@ -100,27 +100,22 @@ order_sp <- df_plot_ready %>%
 
 df_plot_ready$dutch_name <- factor(df_plot_ready$dutch_name, levels = order_sp)
 
-# --- 4. PLOTTEN ---
+# --- 4. PLOTTEN (MAXIMALE LEESBAARHEID + GEFIXTE MARGES) ---
 
 p_trend <- ggplot(df_plot_ready, aes(x = dutch_name, y = Aantal)) +
   
   geom_col_pattern(
-    # FIX: Map pattern direct op Component
     aes(fill = Component, pattern = Component),
-    
-    # Patroon instellingen voor zichtbaarheid
     pattern_fill = "black", 
-    pattern_color = "black",
-    pattern_alpha = 0.5,     # Iets donkerder voor betere zichtbaarheid
-    pattern_density = 0.1,   # Dichtheid van de streepjes
-    pattern_spacing = 0.05,  # Afstand tussen streepjes
+    pattern_color = "black", 
+    pattern_alpha = 0.5,     
+    pattern_density = 0.1,   
+    pattern_spacing = 0.05,  
     pattern_angle = 45,
-    
-    color = "black",         # Rand om de balk
-    linewidth = 0.2
+    color = "black",         
+    linewidth = 0.6          
   ) +
   
-  # Kleuren
   scale_fill_manual(
     values = c(
       "Voor Craywatch"      = "#6BA1D3",
@@ -129,7 +124,6 @@ p_trend <- ggplot(df_plot_ready, aes(x = dutch_name, y = Aantal)) +
     )
   ) +
   
-  # Arcering: Wijs specifiek toe welk level een streep krijgt
   scale_pattern_manual(
     values = c(
       "Door Craywatch"      = "stripe", 
@@ -138,34 +132,55 @@ p_trend <- ggplot(df_plot_ready, aes(x = dutch_name, y = Aantal)) +
     )
   ) +
   
-  # Labels
+  scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + 
+  
+  # Y-AS FIX: expansion zorgt voor extra ruimte boven de hoogste balk
+  scale_y_continuous(expand = expansion(mult = c(0, 0.2))) +
+  
   geom_text(
     data = unique(df_plot_ready[, c("dutch_name", "n_totaal", "label_pct")]),
     aes(x = dutch_name, y = n_totaal, label = label_pct),
-    vjust = -0.5, size = 3, fontface = "bold"
+    vjust = -0.7, size = 11, fontface = "bold" # Iets grotere tekst voor percentages
   ) +
   
   labs(
     title = "Aantal bezette kilometerhokken per soort",
-    subtitle = "voor en na Craywatch",
-    y = "Aantal bezette 1x1 km grid cellen", x = ""
+    subtitle = "Situatie voor en na de start van het Craywatch project",
+    y = "Aantal bezette 1x1 km grid cellen", 
+    x = ""
   ) +
   
-  theme_minimal() +
+  theme_minimal(base_size = 30) + 
   theme(
     legend.position = "bottom", 
     legend.title = element_blank(), 
-    axis.text.x = element_text(angle = 45, hjust = 1),
-    panel.grid.major.x = element_blank()
+    legend.text = element_text(size = 28),
+    legend.key.size = unit(1.8, "cm"), 
+    
+    axis.text.x = element_text(angle = 0, hjust = 0.5, vjust = 1, lineheight = 0.8, size = 26),
+    axis.text.y = element_text(size = 26),
+    axis.title.y = element_text(size = 30, margin = margin(r = 20)),
+    
+    plot.title = element_text(size = 40, face = "bold", margin = margin(b = 10)),
+    plot.subtitle = element_text(size = 30, margin = margin(b = 30)),
+    
+    panel.grid.major.x = element_blank(),
+    plot.margin = margin(40, 40, 40, 40) # Ruime marges rondom de hele plot
   ) +
   
-  # Verberg de patroon-legenda (de kleurenlegenda volstaat)
-  guides(pattern = "none")
+  guides(
+    pattern = "none",
+    fill = guide_legend(
+      override.aes = list(
+        pattern = c("stripe", "none", "none"), 
+        pattern_density = 0.4, 
+        pattern_spacing = 0.02,
+        pattern_alpha = 1
+      )
+    )
+  )
 
-# Opslaan
+# Opslaan op groot formaat
 file_plot <- file.path(dir_gridcell_output, "gridcell_plot.png")
-if(!dir.exists(dirname(file_plot))) dir.create(dirname(file_plot), recursive = TRUE)
+ggsave(file_plot, p_trend, width = 20, height = 14, bg = "white", dpi = 300)
 
-ggsave(file_plot, p_trend, width = 10, height = 7, bg = "white")
-
-message(paste("Klaar! Plot opgeslagen in:", file_plot))
