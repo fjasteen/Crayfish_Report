@@ -45,7 +45,7 @@ end_pre       <- as.Date("2024-05-31")
 # Stap A: Aggregatie
 grid_summary <- occ_grid %>%
   filter(date >= start_pre) %>% 
-  pivot_longer(cols = all_of(required_species), names_to = "species", values_to = "present") %>%
+  pivot_longer(cols = all_of(tolower(gbif_species)), names_to = "species", values_to = "present") %>%
   filter(present == 1) %>%
   group_by(species, grid_id) %>%
   summarise(
