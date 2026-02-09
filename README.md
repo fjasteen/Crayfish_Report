@@ -70,6 +70,9 @@ The repository structure follows that of Jekyll websites.
               
 ```
 
+## Data sources
+The raw data file (first_data.csv) generated in src/operational/03_Process_observation_data.R was manually validated to correct entry errors and discrepancies in the data registered by the volunteers. The resulting validated file (craywatch_data.csv) is the source file for src/analysis/01_prepare_craywatch_data.R (as defined in src/analysis/config.R).
+
 ## License
 
 This work is licensed under a [Creative Commons Attribution 4.0 International License](https://creativecommons.org/licenses/by/4.0/).
