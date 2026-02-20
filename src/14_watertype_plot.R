@@ -86,7 +86,7 @@ p_distributie <- ggplot(data_distributie, aes(x = dutch_name, y = percentage, fi
   ) +
   scale_fill_manual(values = water_colors) +
   scale_x_discrete(labels = function(x) str_wrap(x, width = 10)) + 
-  scale_y_continuous(limits = c(0, 101), expand = expansion(mult = c(0, 0.2))) +
+  scale_y_continuous(limits = c(0, 100), expand = expansion(mult = c(0, 0))) +
   labs(
     title = "Relatieve frequentie van de waarnemingen",
     subtitle = "per type systeem en soort",
@@ -125,4 +125,4 @@ data_community <- cray_long %>%
   mutate(species = factor(species, levels = names(species_labels_dutch)))
 
 p_community <- ggplot(data_community, aes(x = water_type, y = percentage, fill = species)) + 
-  geom_bar(stat = "identity", position = "
+  geom_bar(stat = "identity", position = "")
